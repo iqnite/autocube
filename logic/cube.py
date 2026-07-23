@@ -2,9 +2,6 @@ import json
 import re
 from enum import Enum
 
-from enum import Enum
-import json
-
 
 class Face(Enum):
     D = "D"
