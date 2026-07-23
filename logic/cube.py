@@ -71,7 +71,6 @@ class Cube:
             face.value: [[face.value for _ in range(3)] for _ in range(3)]
             for face in Face
         }
-        self.front_face = "F"
 
     @classmethod
     def from_json(cls, json_data):
