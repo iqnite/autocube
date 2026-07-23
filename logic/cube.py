@@ -2,6 +2,8 @@ import json
 import re
 from enum import Enum
 
+from logic.constants import CORNER_MAP, EDGE_MAP
+
 
 class Face(Enum):
     D = "D"
@@ -10,59 +12,6 @@ class Face(Enum):
     B = "B"
     R = "R"
     L = "L"
-
-
-EDGE_MAP = {
-    # Up layer edges
-    ("U", 2, 1): ("F", 0, 1),
-    ("F", 0, 1): ("U", 2, 1),
-    ("U", 0, 1): ("B", 0, 1),
-    ("B", 0, 1): ("U", 0, 1),
-    ("U", 1, 0): ("L", 0, 1),
-    ("L", 0, 1): ("U", 1, 0),
-    ("U", 1, 2): ("R", 0, 1),
-    ("R", 0, 1): ("U", 1, 2),
-    # Down layer edges
-    ("D", 0, 1): ("F", 2, 1),
-    ("F", 2, 1): ("D", 0, 1),
-    ("D", 2, 1): ("B", 2, 1),
-    ("B", 2, 1): ("D", 2, 1),
-    ("D", 1, 0): ("L", 2, 1),
-    ("L", 2, 1): ("D", 1, 0),
-    ("D", 1, 2): ("R", 2, 1),
-    ("R", 2, 1): ("D", 1, 2),
-    # Middle layer edges
-    ("F", 1, 0): ("L", 1, 2),
-    ("L", 1, 2): ("F", 1, 0),
-    ("F", 1, 2): ("R", 1, 0),
-    ("R", 1, 0): ("F", 1, 2),
-    ("B", 1, 0): ("R", 1, 2),
-    ("R", 1, 2): ("B", 1, 0),
-    ("B", 1, 2): ("L", 1, 0),
-    ("L", 1, 0): ("B", 1, 2),
-}
-
-
-CORNER_MAP = {
-    # Up layer corners
-    ("U", 2, 0): (("F", 0, 0), ("L", 0, 2)),
-    ("F", 0, 0): (("U", 2, 0), ("L", 0, 2)),
-    ("U", 2, 2): (("F", 0, 2), ("R", 0, 0)),
-    ("F", 0, 2): (("U", 2, 2), ("R", 0, 0)),
-    ("U", 0, 0): (("B", 0, 2), ("L", 0, 0)),
-    ("B", 0, 2): (("U", 0, 0), ("L", 0, 0)),
-    ("U", 0, 2): (("B", 0, 0), ("R", 0, 2)),
-    ("B", 0, 0): (("U", 0, 2), ("R", 0, 2)),
-    # Down layer corners
-    ("D", 0, 0): (("F", 2, 0), ("L", 2, 2)),
-    ("F", 2, 0): (("D", 0, 0), ("L", 2, 2)),
-    ("D", 0, 2): (("F", 2, 2), ("R", 2, 0)),
-    ("F", 2, 2): (("D", 0, 2), ("R", 2, 0)),
-    ("D", 2, 0): (("B", 2, 2), ("L", 2, 0)),
-    ("B", 2, 2): (("D", 2, 0), ("L", 2, 0)),
-    ("D", 2, 2): (("B", 2, 0), ("R", 2, 2)),
-    ("B", 2, 0): (("D", 2, 2), ("R", 2, 2)),
-}
 
 
 class Cube:
@@ -117,54 +66,6 @@ class Cube:
                 ("L", 0, 0),
             ]
             self._cycle_band(band, clockwise)
-        elif face == "F":
-            band = [
-                ("U", 2, 0),
-                ("U", 2, 1),
-                ("U", 2, 2),
-                ("R", 0, 0),
-                ("R", 1, 0),
-                ("R", 2, 0),
-                ("D", 0, 2),
-                ("D", 0, 1),
-                ("D", 0, 0),
-                ("L", 2, 2),
-                ("L", 1, 2),
-                ("L", 0, 2),
-            ]
-            self._cycle_band(band, clockwise)
-        elif face == "R":
-            band = [
-                ("U", 0, 2),
-                ("U", 1, 2),
-                ("U", 2, 2),
-                ("B", 0, 0),
-                ("B", 1, 0),
-                ("B", 2, 0),
-                ("D", 0, 2),
-                ("D", 1, 2),
-                ("D", 2, 2),
-                ("F", 0, 2),
-                ("F", 1, 2),
-                ("F", 2, 2),
-            ]
-            self._cycle_band(band, clockwise)
-        elif face == "L":
-            band = [
-                ("U", 0, 0),
-                ("U", 1, 0),
-                ("U", 2, 0),
-                ("F", 0, 0),
-                ("F", 1, 0),
-                ("F", 2, 0),
-                ("D", 0, 0),
-                ("D", 1, 0),
-                ("D", 2, 0),
-                ("B", 0, 2),
-                ("B", 1, 2),
-                ("B", 2, 2),
-            ]
-            self._cycle_band(band, clockwise)
         elif face == "D":
             band = [
                 ("F", 2, 0),
@@ -181,6 +82,22 @@ class Cube:
                 ("L", 2, 2),
             ]
             self._cycle_band(band, clockwise)
+        elif face == "F":
+            band = [
+                ("U", 2, 0),
+                ("U", 2, 1),
+                ("U", 2, 2),
+                ("R", 0, 0),
+                ("R", 1, 0),
+                ("R", 2, 0),
+                ("D", 0, 2),
+                ("D", 0, 1),
+                ("D", 0, 0),
+                ("L", 2, 2),
+                ("L", 1, 2),
+                ("L", 0, 2),
+            ]
+            self._cycle_band(band, clockwise)
         elif face == "B":
             band = [
                 ("U", 0, 2),
@@ -189,12 +106,44 @@ class Cube:
                 ("L", 0, 0),
                 ("L", 1, 0),
                 ("L", 2, 0),
-                ("D", 2, 2),
-                ("D", 2, 1),
                 ("D", 2, 0),
+                ("D", 2, 1),
+                ("D", 2, 2),
                 ("R", 2, 2),
                 ("R", 1, 2),
                 ("R", 0, 2),
+            ]
+            self._cycle_band(band, clockwise)
+        elif face == "R":
+            band = [
+                ("U", 2, 2),
+                ("U", 1, 2),
+                ("U", 0, 2),
+                ("B", 0, 0),
+                ("B", 1, 0),
+                ("B", 2, 0),
+                ("D", 2, 2),
+                ("D", 1, 2),
+                ("D", 0, 2),
+                ("F", 2, 2),
+                ("F", 1, 2),
+                ("F", 0, 2),
+            ]
+            self._cycle_band(band, clockwise)
+        elif face == "L":
+            band = [
+                ("U", 0, 0),
+                ("U", 1, 0),
+                ("U", 2, 0),
+                ("F", 0, 0),
+                ("F", 1, 0),
+                ("F", 2, 0),
+                ("D", 0, 0),
+                ("D", 1, 0),
+                ("D", 2, 0),
+                ("B", 2, 2),
+                ("B", 1, 2),
+                ("B", 0, 2),
             ]
             self._cycle_band(band, clockwise)
         else:
@@ -220,7 +169,7 @@ class Cube:
         adj_face, adj_row, adj_col = EDGE_MAP[edge]
         return self.state[adj_face][adj_row][adj_col]
 
-    def is_bleeding_edge(self, edge: tuple[str, int, int]) -> bool:
+    def edge_is_bleeding(self, edge: tuple[str, int, int]) -> bool:
         adj_color = self.get_color_adjacent_to_edge(edge)
         adj_face = self.get_face_adjacent_to_edge(edge)
         return adj_color == self.state[adj_face][1][1]
@@ -235,21 +184,25 @@ class Cube:
         return corners
 
     @staticmethod
-    def get_faces_adjacent_to_corner(
-        corner: tuple[str, int, int],
-    ) -> tuple[str, str]:
+    def get_faces_adjacent_to_corner(corner: tuple[str, int, int]) -> tuple[str, str]:
         return CORNER_MAP[corner][0][0], CORNER_MAP[corner][1][0]
 
     def get_colors_adjacent_to_corner(
         self, corner: tuple[str, int, int]
     ) -> tuple[str, str]:
-        adj_faces = self.get_faces_adjacent_to_corner(corner)
-        return self.state[adj_faces[0]][1][1], self.state[adj_faces[1]][1][1]
+        adj_coord_1, adj_coord_2 = CORNER_MAP[corner]
+        color_1 = self.state[adj_coord_1[0]][adj_coord_1[1]][adj_coord_1[2]]
+        color_2 = self.state[adj_coord_2[0]][adj_coord_2[1]][adj_coord_2[2]]
+        return color_1, color_2
 
 
 class Algorithm:
-    def __init__(self, moves: str):
+    def __init__(self, moves: str, translation_reference: str | None = None):
         self.moves = list(self.parse(moves))
+        if translation_reference:
+            self.moves = [
+                self.translate_move(move, translation_reference) for move in self.moves
+            ]
 
     def __add__(self, other: Algorithm | str | list):
         if isinstance(other, Algorithm):
