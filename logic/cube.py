@@ -6,25 +6,22 @@ from enum import Enum
 import json
 
 
-class Color(Enum):
-    W = "W"
-    Y = "Y"
-    G = "G"
+class Face(Enum):
+    D = "D"
+    U = "U"
+    F = "F"
     B = "B"
     R = "R"
-    O = "O"
+    L = "L"
 
 
 class Cube:
     def __init__(self, state=None):
         self.state = state or {
-            "U": [[Color.W.value for _ in range(3)] for _ in range(3)],
-            "D": [[Color.Y.value for _ in range(3)] for _ in range(3)],
-            "F": [[Color.G.value for _ in range(3)] for _ in range(3)],
-            "B": [[Color.B.value for _ in range(3)] for _ in range(3)],
-            "R": [[Color.R.value for _ in range(3)] for _ in range(3)],
-            "L": [[Color.O.value for _ in range(3)] for _ in range(3)],
+            face.value: [[face.value for _ in range(3)] for _ in range(3)]
+            for face in Face
         }
+        self.front_face = "F"
 
     @classmethod
     def from_json(cls, json_data):
@@ -162,6 +159,29 @@ class Algorithm:
     def __init__(self, moves: str):
         self.moves = list(self.parse(moves))
 
+    def __add__(self, other: Algorithm | str | list):
+        if isinstance(other, Algorithm):
+            return Algorithm(" ".join(self.moves + other.moves))
+        elif isinstance(other, str):
+            return Algorithm(" ".join(self.moves + list(self.parse(other))))
+        elif isinstance(other, list):
+            return Algorithm(" ".join(self.moves + other))
+        else:
+            raise TypeError(f"Unsupported type for addition: {type(other)}")
+
+    def __mul__(self, other: int):
+        return Algorithm(" ".join(self.moves * other))
+
+    def __neg__(self):
+        inverted_moves = [
+            move[:-1] if move.endswith("'") else move + "'"
+            for move in reversed(self.moves)
+        ]
+        return Algorithm(" ".join(inverted_moves))
+
+    def __str__(self):
+        return " ".join(self.moves)
+
     def apply(self, cube: Cube):
         for move in self.moves:
             cube.apply_move(move)
@@ -177,6 +197,28 @@ class Algorithm:
             repeat_count = int(repeat_count) if repeat_count else 1
             for _ in range(repeat_count):
                 yield base_move
+
+    def translate(self, reference_front: str) -> "Algorithm":
+        translated_moves = [
+            self.translate_move(move, reference_front) for move in self.moves
+        ]
+        return Algorithm(" ".join(translated_moves))
+
+    @staticmethod
+    def translate_move(move: str, reference_front: str) -> str:
+        if move[0] in "UD":
+            return move
+        face_mapping = {
+            "F": {"F": "F", "B": "B", "L": "L", "R": "R"},
+            "B": {"F": "B", "B": "F", "L": "R", "R": "L"},
+            "L": {"F": "L", "B": "R", "L": "B", "R": "F"},
+            "R": {"F": "R", "B": "L", "L": "F", "R": "B"},
+        }
+        return (
+            face_mapping[reference_front][move[0]] + move[1:]
+            if len(move) > 1
+            else face_mapping[reference_front][move[0]]
+        )
 
     class CubeRotation(Enum):
         U = "U"

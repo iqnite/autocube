@@ -21,11 +21,11 @@ def draw_cube_net(cube_state: dict[str, list[list[str]]]) -> None:
         "D": (3, 0),
     }
     color_map = {
-        "W": "#FFFFFF",  # White
-        "Y": "#FFD500",  # Yellow
+        "D": "#FFFFFF",  # White
+        "U": "#FFD500",  # Yellow
         "R": "#C41E3A",  # Red
-        "O": "#FF5800",  # Orange
-        "G": "#009E60",  # Green
+        "L": "#FF5800",  # Orange
+        "F": "#009E60",  # Green
         "B": "#0051BA",  # Blue
     }
     for face_name, (start_x, start_y) in offsets.items():
@@ -48,8 +48,11 @@ def draw_cube_net(cube_state: dict[str, list[list[str]]]) -> None:
     ax.set_xlim(-1, 13)
     ax.set_ylim(-1, 10)
     plt.tight_layout()
-    plt.show()
 
 
-def visualize_cube(cube: Cube):
+def visualize_cube(cube: Cube, live: bool = False):
     draw_cube_net(cube.state)
+    if live:
+        plt.pause(0.1)
+    else:
+        plt.show()
