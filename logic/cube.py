@@ -12,6 +12,37 @@ class Face(Enum):
     L = "L"
 
 
+EDGE_MAP = {
+    # Up layer edges
+    ("U", 2, 1): ("F", 0, 1),
+    ("F", 0, 1): ("U", 2, 1),
+    ("U", 0, 1): ("B", 0, 1),
+    ("B", 0, 1): ("U", 0, 1),
+    ("U", 1, 0): ("L", 0, 1),
+    ("L", 0, 1): ("U", 1, 0),
+    ("U", 1, 2): ("R", 0, 1),
+    ("R", 0, 1): ("U", 1, 2),
+    # Down layer edges
+    ("D", 0, 1): ("F", 2, 1),
+    ("F", 2, 1): ("D", 0, 1),
+    ("D", 2, 1): ("B", 2, 1),
+    ("B", 2, 1): ("D", 2, 1),
+    ("D", 1, 0): ("L", 2, 1),
+    ("L", 2, 1): ("D", 1, 0),
+    ("D", 1, 2): ("R", 2, 1),
+    ("R", 2, 1): ("D", 1, 2),
+    # Middle layer edges
+    ("F", 1, 0): ("L", 1, 2),
+    ("L", 1, 2): ("F", 1, 0),
+    ("F", 1, 2): ("R", 1, 0),
+    ("R", 1, 0): ("F", 1, 2),
+    ("B", 1, 0): ("R", 1, 2),
+    ("R", 1, 2): ("B", 1, 0),
+    ("B", 1, 2): ("L", 1, 0),
+    ("L", 1, 0): ("B", 1, 2),
+}
+
+
 class Cube:
     def __init__(self, state=None):
         self.state = state or {
@@ -150,6 +181,28 @@ class Cube:
 
     def apply_algorithm(self, algorithm: "Algorithm"):
         algorithm.apply(self)
+
+    def find_edges_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
+        edges = []
+        valid_coords = [(0, 1), (1, 0), (1, 2), (2, 1)]
+        for face in ["U", "D", "L", "R", "F", "B"]:
+            for row, col in valid_coords:
+                if self.state[face][row][col] == color:
+                    edges.append((face, row, col))
+        return edges
+
+    @staticmethod
+    def get_face_adjacent_to_edge(edge: tuple[str, int, int]) -> str:
+        return EDGE_MAP[edge][0]
+
+    def get_color_adjacent_to_edge(self, edge: tuple[str, int, int]) -> str:
+        adj_face, adj_row, adj_col = EDGE_MAP[edge]
+        return self.state[adj_face][adj_row][adj_col]
+
+    def is_bleeding_edge(self, edge: tuple[str, int, int]) -> bool:
+        adj_color = self.get_color_adjacent_to_edge(edge)
+        adj_face = self.get_face_adjacent_to_edge(edge)
+        return adj_color == self.state[adj_face][1][1]
 
 
 class Algorithm:
