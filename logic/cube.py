@@ -43,6 +43,28 @@ EDGE_MAP = {
 }
 
 
+CORNER_MAP = {
+    # Up layer corners
+    ("U", 2, 0): (("F", 0, 0), ("L", 0, 2)),
+    ("F", 0, 0): (("U", 2, 0), ("L", 0, 2)),
+    ("U", 2, 2): (("F", 0, 2), ("R", 0, 0)),
+    ("F", 0, 2): (("U", 2, 2), ("R", 0, 0)),
+    ("U", 0, 0): (("B", 0, 2), ("L", 0, 0)),
+    ("B", 0, 2): (("U", 0, 0), ("L", 0, 0)),
+    ("U", 0, 2): (("B", 0, 0), ("R", 0, 2)),
+    ("B", 0, 0): (("U", 0, 2), ("R", 0, 2)),
+    # Down layer corners
+    ("D", 0, 0): (("F", 2, 0), ("L", 2, 2)),
+    ("F", 2, 0): (("D", 0, 0), ("L", 2, 2)),
+    ("D", 0, 2): (("F", 2, 2), ("R", 2, 0)),
+    ("F", 2, 2): (("D", 0, 2), ("R", 2, 0)),
+    ("D", 2, 0): (("B", 2, 2), ("L", 2, 0)),
+    ("B", 2, 2): (("D", 2, 0), ("L", 2, 0)),
+    ("D", 2, 2): (("B", 2, 0), ("R", 2, 2)),
+    ("B", 2, 0): (("D", 2, 2), ("R", 2, 2)),
+}
+
+
 class Cube:
     def __init__(self, state=None):
         self.state = state or {
@@ -203,6 +225,27 @@ class Cube:
         adj_color = self.get_color_adjacent_to_edge(edge)
         adj_face = self.get_face_adjacent_to_edge(edge)
         return adj_color == self.state[adj_face][1][1]
+
+    def find_corners_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
+        corners = []
+        valid_coords = [(0, 0), (0, 2), (2, 0), (2, 2)]
+        for face in ["U", "D", "L", "R", "F", "B"]:
+            for row, col in valid_coords:
+                if self.state[face][row][col] == color:
+                    corners.append((face, row, col))
+        return corners
+
+    @staticmethod
+    def get_faces_adjacent_to_corner(
+        corner: tuple[str, int, int],
+    ) -> tuple[str, str]:
+        return CORNER_MAP[corner][0][0], CORNER_MAP[corner][1][0]
+
+    def get_colors_adjacent_to_corner(
+        self, corner: tuple[str, int, int]
+    ) -> tuple[str, str]:
+        adj_faces = self.get_faces_adjacent_to_corner(corner)
+        return self.state[adj_faces[0]][1][1], self.state[adj_faces[1]][1][1]
 
 
 class Algorithm:
