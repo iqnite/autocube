@@ -149,8 +149,8 @@ class Cube:
         else:
             raise NotImplementedError(f"Move {move} is not fully mapped yet.")
 
-    def apply_algorithm(self, algorithm: "Algorithm"):
-        algorithm.apply(self)
+    def apply_algorithm(self, algorithm: "Algorithm", on_move=None):
+        algorithm.apply(self, on_move=on_move)
 
     def get_edges_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
         edges = []
@@ -227,9 +227,11 @@ class Algorithm:
     def __str__(self):
         return " ".join(self.moves)
 
-    def apply(self, cube: Cube):
+    def apply(self, cube: Cube, on_move=None):
         for move in self.moves:
             cube.apply_move(move)
+            if on_move is not None:
+                on_move()
 
     @staticmethod
     def parse(text: str):

@@ -3,9 +3,17 @@ import matplotlib.patches as patches
 
 from logic.cube import Cube
 
+_LIVE_FIG = None
+_LIVE_AX = None
 
-def draw_cube_net(cube_state: dict[str, list[list[str]]]) -> None:
-    fig, ax = plt.subplots(figsize=(8, 6))
+
+def draw_cube_net(cube_state: dict[str, list[list[str]]], ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.figure
+        ax.clear()
+
     ax.set_aspect("equal")
     ax.axis("off")
 
@@ -47,12 +55,22 @@ def draw_cube_net(cube_state: dict[str, list[list[str]]]) -> None:
                 ax.add_patch(rect)
     ax.set_xlim(-1, 13)
     ax.set_ylim(-1, 10)
-    plt.tight_layout()
+    return fig, ax
 
 
 def visualize_cube(cube: Cube, live: bool = False):
-    draw_cube_net(cube.state)
+    global _LIVE_FIG, _LIVE_AX
+
     if live:
-        plt.pause(0.1)
+        if _LIVE_FIG is None or _LIVE_AX is None:
+            plt.ion()
+            _LIVE_FIG, _LIVE_AX = plt.subplots(figsize=(8, 6))
+            _LIVE_FIG.show()
+        draw_cube_net(cube.state, _LIVE_AX)
+        _LIVE_FIG.tight_layout()
+        _LIVE_FIG.canvas.draw_idle()
+        _LIVE_FIG.canvas.flush_events()
     else:
+        fig, _ = draw_cube_net(cube.state)
+        fig.tight_layout()
         plt.show()

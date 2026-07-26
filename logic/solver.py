@@ -1,17 +1,16 @@
 from typing import Literal
 
 from logic.cube import Algorithm, Cube
-from tools.visualizer import visualize_cube
 from logic.constants import RIGHT_EDGE_INSERTIONS, FRONT_FACE_FOR_CORNER
 
 
-def solve_cube(cube: Cube):
-    down_cross(cube)
-    down_corners(cube)
-    center_edges(cube)
+def solve_cube(cube: Cube, on_move=None):
+    down_cross(cube, on_move=on_move)
+    down_corners(cube, on_move=on_move)
+    center_edges(cube, on_move=on_move)
 
 
-def down_cross(cube: Cube):
+def down_cross(cube: Cube, on_move=None):
     correct = 0
     while correct < 4:
         correct = 0
@@ -23,33 +22,36 @@ def down_cross(cube: Cube):
                 if cube.get_color_adjacent_to_edge(edge) == cube.state[adj_face][1][1]:
                     correct += 1
                     continue
-                cube.apply_algorithm(Algorithm(f"{adj_face}2"))
+                cube.apply_algorithm(Algorithm(f"{adj_face}2"), on_move=on_move)
                 break
             if face == "U":
                 if not cube.edge_is_bleeding(edge):
-                    cube.apply_algorithm(Algorithm("U"))
+                    cube.apply_algorithm(Algorithm("U"), on_move=on_move)
                     break
-                cube.apply_algorithm(Algorithm(f"{adj_face}2"))
+                cube.apply_algorithm(Algorithm(f"{adj_face}2"), on_move=on_move)
                 break
             if face in ["L", "R", "F", "B"]:
                 if adj_face in ["U", "D"]:
-                    cube.apply_algorithm(Algorithm(face))
+                    cube.apply_algorithm(Algorithm(face), on_move=on_move)
                     break
                 is_two_steps_away = row == 0
                 is_clockwise = (not is_two_steps_away) and col == 0
                 if cube.edge_is_bleeding(edge):
                     modifier = "2" if is_two_steps_away else "" if is_clockwise else "'"
-                    cube.apply_algorithm(Algorithm(f"{adj_face}{modifier}"))
+                    cube.apply_algorithm(
+                        Algorithm(f"{adj_face}{modifier}"), on_move=on_move
+                    )
                     break
                 mod_first = "'" if is_clockwise else ""
                 mod_last = "" if is_clockwise else "'"
                 cube.apply_algorithm(
-                    Algorithm(f"{adj_face}{mod_first} U {adj_face}{mod_last}")
+                    Algorithm(f"{adj_face}{mod_first} U {adj_face}{mod_last}"),
+                    on_move=on_move,
                 )
                 break
 
 
-def down_corners(cube: Cube):
+def down_corners(cube: Cube, on_move=None):
     while True:
         white_corners = cube.get_corners_of_color(color="D")
         unsolved_corners = []
@@ -92,26 +94,27 @@ def down_corners(cube: Cube):
         in_bottom_layer = target["face"] == "D" or "D" in target["adj_faces"]
         if in_bottom_layer:
             cube.apply_algorithm(
-                Algorithm("R U R' U'", translation_reference=front_face)
+                Algorithm("R U R' U'", translation_reference=front_face),
+                on_move=on_move,
             )
         else:
             if target["is_correct_column"]:
                 if target["face"] == "U":
-                    cube.apply_algorithm(sexy_move(front_face) * 3)
+                    cube.apply_algorithm(sexy_move(front_face) * 3, on_move=on_move)
                 elif target["face"] == front_face:
-                    cube.apply_algorithm(-sexy_move(front_face))
+                    cube.apply_algorithm(-sexy_move(front_face), on_move=on_move)
                 else:
                     cube.apply_algorithm(
-                        Algorithm("R U R'", translation_reference=front_face)
+                        Algorithm("R U R'", translation_reference=front_face),
+                        on_move=on_move,
                     )
             else:
-                cube.apply_algorithm(Algorithm("U"))
+                cube.apply_algorithm(Algorithm("U"), on_move=on_move)
 
 
-def center_edges(cube: Cube):
+def center_edges(cube: Cube, on_move=None):
     while True:
         unsolved_edges = []
-        # visualize_cube(cube, live=True)
         for face in ["F", "R", "B", "L"]:
             edge = (face, 1, 0)
             adj_face = cube.get_face_adjacent_to_edge(edge)
@@ -133,7 +136,8 @@ def center_edges(cube: Cube):
                                 else "left"
                             ),
                             face,
-                        )
+                        ),
+                        on_move=on_move,
                     )
                     break
         else:
@@ -148,7 +152,8 @@ def center_edges(cube: Cube):
                         else "left"
                     ),
                     face,
-                )
+                ),
+                on_move=on_move,
             )
 
 

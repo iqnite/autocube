@@ -12,6 +12,6 @@ if __name__ == "__main__":
     shuffle_moves = " ".join(random.choices(["U", "D", "L", "R", "F", "B"], k=40))
     cube.apply_algorithm(Algorithm(shuffle_moves))
     visualize_cube(cube)
-    solve_cube(cube)
+    solve_cube(cube, on_move=lambda: visualize_cube(cube, live=True))
     print(cube.to_json())
     visualize_cube(cube)
