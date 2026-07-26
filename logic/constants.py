@@ -70,3 +70,10 @@ FRONT_FACE_FOR_CORNER = {
     frozenset(["B", "L"]): "B",
     frozenset(["B", "R"]): "R",
 }
+
+RIGHT_EDGE_INSERTIONS = [
+    frozenset(["F", "R"]),
+    frozenset(["R", "B"]),
+    frozenset(["B", "L"]),
+    frozenset(["L", "F"]),
+]

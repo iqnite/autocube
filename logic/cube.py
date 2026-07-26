@@ -152,7 +152,7 @@ class Cube:
     def apply_algorithm(self, algorithm: "Algorithm"):
         algorithm.apply(self)
 
-    def find_edges_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
+    def get_edges_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
         edges = []
         valid_coords = [(0, 1), (1, 0), (1, 2), (2, 1)]
         for face in ["U", "D", "L", "R", "F", "B"]:
@@ -174,7 +174,7 @@ class Cube:
         adj_face = self.get_face_adjacent_to_edge(edge)
         return adj_color == self.state[adj_face][1][1]
 
-    def find_corners_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
+    def get_corners_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
         corners = []
         valid_coords = [(0, 0), (0, 2), (2, 0), (2, 2)]
         for face in ["U", "D", "L", "R", "F", "B"]:

@@ -1,18 +1,21 @@
+from typing import Literal
+
 from logic.cube import Algorithm, Cube
 from tools.visualizer import visualize_cube
-from logic.constants import FRONT_FACE_FOR_CORNER
+from logic.constants import RIGHT_EDGE_INSERTIONS, FRONT_FACE_FOR_CORNER
 
 
 def solve_cube(cube: Cube):
     down_cross(cube)
     down_corners(cube)
+    center_edges(cube)
 
 
 def down_cross(cube: Cube):
     correct = 0
     while correct < 4:
         correct = 0
-        white_edges = cube.find_edges_of_color(color="D")
+        white_edges = cube.get_edges_of_color(color="D")
         for edge in white_edges:
             face, row, col = edge
             adj_face = cube.get_face_adjacent_to_edge(edge)
@@ -48,8 +51,7 @@ def down_cross(cube: Cube):
 
 def down_corners(cube: Cube):
     while True:
-        visualize_cube(cube, live=True)
-        white_corners = cube.find_corners_of_color(color="D")
+        white_corners = cube.get_corners_of_color(color="D")
         unsolved_corners = []
         for corner in white_corners:
             face, row, col = corner
@@ -106,5 +108,57 @@ def down_corners(cube: Cube):
                 cube.apply_algorithm(Algorithm("U"))
 
 
-def sexy_move(reference_front: str) -> Algorithm:
+def center_edges(cube: Cube):
+    while True:
+        unsolved_edges = []
+        # visualize_cube(cube, live=True)
+        for face in ["F", "R", "B", "L"]:
+            edge = (face, 1, 0)
+            adj_face = cube.get_face_adjacent_to_edge(edge)
+            if cube.state[face][1][1] != cube.state[adj_face][1][1]:
+                unsolved_edges.append((face, adj_face))
+        if not unsolved_edges:
+            break
+        up_edges = [("U", 1, 0), ("U", 1, 2), ("D", 1, 0), ("D", 1, 2)]
+        for edge in up_edges:
+            if edge in unsolved_edges:
+                face = edge[0]
+                adj_face = cube.get_face_adjacent_to_edge(edge)
+                if cube.edge_is_bleeding(edge):
+                    cube.apply_algorithm(
+                        insert_edge(
+                            (
+                                "right"
+                                if frozenset([face, adj_face]) in RIGHT_EDGE_INSERTIONS
+                                else "left"
+                            ),
+                            face,
+                        )
+                    )
+                    break
+        else:
+            # If no edges are in the up layer, move one there
+            edge = unsolved_edges[0]
+            face, adj_face = edge
+            cube.apply_algorithm(
+                insert_edge(
+                    (
+                        "right"
+                        if frozenset([face, adj_face]) in RIGHT_EDGE_INSERTIONS
+                        else "left"
+                    ),
+                    face,
+                )
+            )
+
+
+def sexy_move(reference_front: str | None = None) -> Algorithm:
     return Algorithm("R U R' U'", translation_reference=reference_front)
+
+
+def insert_edge(
+    side: Literal["left", "right"], reference_front: str | None = None
+) -> Algorithm:
+    if side == "right":
+        return Algorithm("U F' R U' R' F R U R'", translation_reference=reference_front)
+    return Algorithm("U' F L U L' F' L U' L'", translation_reference=reference_front)
