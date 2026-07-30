@@ -31,8 +31,15 @@ def down_cross(cube: Cube):
                 cube.apply_algorithm(Algorithm(f"{adj_face}2"))
                 break
             if face in ["L", "R", "F", "B"]:
-                if adj_face in ["U", "D"]:
-                    if cube.edge_is_bleeding(Facelet(face, 2, 1)):
+                if adj_face == "D":
+                    cube.apply_algorithm(Algorithm(f"{face}2"))
+                    break
+                if adj_face == "U":
+                    opposite_facelet = Facelet(face, 2, 1)
+                    if opposite_facelet.face == face and cube.edge_is_bleeding(
+                        opposite_facelet
+                    ):
+                        # Do not rotate the face if it is already correct
                         cube.apply_algorithm(Algorithm("U"))
                         break
                     cube.apply_algorithm(Algorithm(face))
