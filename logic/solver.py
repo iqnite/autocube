@@ -1,7 +1,7 @@
 from typing import Literal
 
+from logic.constants import FRONT_FACE_FOR_CORNER, RIGHT_EDGE_INSERTIONS
 from logic.cube import Algorithm, Cube, Facelet
-from logic.constants import RIGHT_EDGE_INSERTIONS, FRONT_FACE_FOR_CORNER
 
 
 def solve_cube(cube: Cube):
