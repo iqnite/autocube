@@ -122,11 +122,15 @@ def center_edges(cube: Cube, on_move=None):
                 unsolved_edges.append((face, adj_face))
         if not unsolved_edges:
             break
-        up_edges = [("U", 1, 0), ("U", 1, 2), ("D", 1, 0), ("D", 1, 2)]
-        for edge in up_edges:
-            if edge in unsolved_edges:
-                face = edge[0]
-                adj_face = cube.get_face_adjacent_to_edge(edge)
+        up_edge_positions = [("U", 1, 0), ("U", 1, 2), ("D", 1, 0), ("D", 1, 2)]
+        for edge_position in up_edge_positions:
+            edge = (edge_position[0], edge_position[1], edge_position[2])
+            edge_colors = (
+                cube.state[edge[0]][edge[1]][edge[2]],
+                cube.get_color_adjacent_to_edge(edge),
+            )
+            if edge_colors in unsolved_edges:
+                face, adj_face = edge_colors
                 if cube.edge_is_bleeding(edge):
                     cube.apply_algorithm(
                         insert_edge(
@@ -140,10 +144,12 @@ def center_edges(cube: Cube, on_move=None):
                         on_move=on_move,
                     )
                     break
+                else:
+                    cube.apply_algorithm(Algorithm("U"), on_move=on_move)
+                    break
         else:
             # If no edges are in the up layer, move one there
-            edge = unsolved_edges[0]
-            face, adj_face = edge
+            face, adj_face = unsolved_edges[0]
             cube.apply_algorithm(
                 insert_edge(
                     (
