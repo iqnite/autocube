@@ -32,9 +32,10 @@ def down_cross(cube: Cube):
                 break
             if face in ["L", "R", "F", "B"]:
                 if adj_face in ["U", "D"]:
-                    cube.apply_algorithm(Algorithm(face))
-                    if adj_face == "U":
+                    if cube.edge_is_bleeding((face, 2, 1)):
                         cube.apply_algorithm(Algorithm("U"))
+                        break
+                    cube.apply_algorithm(Algorithm(face))
                     break
                 is_two_steps_away = row == 0
                 is_clockwise = (not is_two_steps_away) and col == 0
