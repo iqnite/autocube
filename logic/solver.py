@@ -33,6 +33,8 @@ def down_cross(cube: Cube, on_move=None):
             if face in ["L", "R", "F", "B"]:
                 if adj_face in ["U", "D"]:
                     cube.apply_algorithm(Algorithm(face), on_move=on_move)
+                    if adj_face == "U":
+                        cube.apply_algorithm(Algorithm("U"), on_move=on_move)
                     break
                 is_two_steps_away = row == 0
                 is_clockwise = (not is_two_steps_away) and col == 0
