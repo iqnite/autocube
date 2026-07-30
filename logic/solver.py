@@ -1,6 +1,6 @@
 from typing import Literal
 
-from logic.cube import Algorithm, Cube
+from logic.cube import Algorithm, Cube, Facelet
 from logic.constants import RIGHT_EDGE_INSERTIONS, FRONT_FACE_FOR_CORNER
 
 
@@ -16,7 +16,7 @@ def down_cross(cube: Cube):
         correct = 0
         white_edges = cube.get_edges_of_color(color="D")
         for edge in white_edges:
-            face, row, col = edge
+            face, row, col = edge.tuple
             adj_face = cube.get_face_adjacent_to_edge(edge)
             if face == "D":
                 if cube.get_color_adjacent_to_edge(edge) == cube.state[adj_face][1][1]:
@@ -32,7 +32,7 @@ def down_cross(cube: Cube):
                 break
             if face in ["L", "R", "F", "B"]:
                 if adj_face in ["U", "D"]:
-                    if cube.edge_is_bleeding((face, 2, 1)):
+                    if cube.edge_is_bleeding(Facelet(face, 2, 1)):
                         cube.apply_algorithm(Algorithm("U"))
                         break
                     cube.apply_algorithm(Algorithm(face))
@@ -56,7 +56,7 @@ def down_corners(cube: Cube):
         white_corners = cube.get_corners_of_color(color="D")
         unsolved_corners = []
         for corner in white_corners:
-            face, row, col = corner
+            face, row, col = corner.tuple
             adj_faces = cube.get_faces_adjacent_to_corner(corner)
             colors = cube.get_colors_adjacent_to_corner(corner)
             if face in ("U", "D"):
@@ -114,7 +114,7 @@ def center_edges(cube: Cube):
     while True:
         unsolved_edges = []
         for face in ["F", "R", "B", "L"]:
-            edge = (face, 1, 0)
+            edge = Facelet(face, 1, 0)
             adj_face = cube.get_face_adjacent_to_edge(edge)
             if cube.state[face][1][1] != cube.state[adj_face][1][1]:
                 unsolved_edges.append((face, adj_face))
@@ -122,9 +122,9 @@ def center_edges(cube: Cube):
             break
         up_edge_positions = [("U", 1, 0), ("U", 1, 2), ("D", 1, 0), ("D", 1, 2)]
         for edge_position in up_edge_positions:
-            edge = (edge_position[0], edge_position[1], edge_position[2])
+            edge = Facelet(edge_position[0], edge_position[1], edge_position[2])
             edge_colors = (
-                cube.state[edge[0]][edge[1]][edge[2]],
+                cube.state[edge.face][edge.row][edge.col],
                 cube.get_color_adjacent_to_edge(edge),
             )
             if edge_colors in unsolved_edges:
