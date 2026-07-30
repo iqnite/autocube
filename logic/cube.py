@@ -15,15 +15,16 @@ class Face(Enum):
 
 
 class Cube:
-    def __init__(self, state=None):
+    def __init__(self, state=None, on_move=None):
         self.state = state or {
             face.value: [[face.value for _ in range(3)] for _ in range(3)]
             for face in Face
         }
+        self.on_move = on_move
 
     @classmethod
-    def from_json(cls, json_data):
-        return cls(state=json_data.get("faces"))
+    def from_json(cls, json_data, on_move=None):
+        return cls(state=json_data.get("faces"), on_move=on_move)
 
     def to_json(self):
         return json.dumps(self.state, indent=2)
@@ -150,7 +151,7 @@ class Cube:
             raise NotImplementedError(f"Move {move} is not fully mapped yet.")
 
     def apply_algorithm(self, algorithm: "Algorithm", on_move=None):
-        algorithm.apply(self, on_move=on_move)
+        algorithm.apply(self, on_move=on_move or self.on_move)
 
     def get_edges_of_color(self, color: str = "D") -> list[tuple[str, int, int]]:
         edges = []
@@ -230,6 +231,7 @@ class Algorithm:
     def apply(self, cube: Cube, on_move=None):
         for move in self.moves:
             cube.apply_move(move)
+            on_move = on_move or cube.on_move
             if on_move is not None:
                 on_move()
 
