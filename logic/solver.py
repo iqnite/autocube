@@ -25,10 +25,10 @@ def down_cross(cube: Cube):
                 cube.apply_algorithm(Algorithm(f"{adj_face}2"))
                 break
             if face == "U":
-                if not cube.edge_is_bleeding(edge):
-                    cube.apply_algorithm(Algorithm("U"))
+                if cube.edge_is_bleeding(edge):
+                    cube.apply_algorithm(Algorithm(f"{adj_face}2"))
                     break
-                cube.apply_algorithm(Algorithm(f"{adj_face}2"))
+                cube.apply_algorithm(Algorithm("U"))
                 break
             if face in ["L", "R", "F", "B"]:
                 if adj_face == "D":
@@ -174,6 +174,7 @@ def center_edges(cube: Cube):
                         face,
                     )
                 )
+                up_rotations = 0
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:

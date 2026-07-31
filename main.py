@@ -1,6 +1,7 @@
 import json
 import random
-import time
+
+from matplotlib import pyplot as plt
 
 from logic.cube import Algorithm, Cube
 from logic.solver import solve_cube
@@ -15,5 +16,4 @@ if __name__ == "__main__":
     cube.on_move = lambda: visualize_cube(cube, live=True)
     solve_cube(cube)
     print(cube.to_json())
-    visualize_cube(cube)
-    visualize_cube(cube)
+    plt.show(block=True)

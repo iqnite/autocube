@@ -73,4 +73,4 @@ def visualize_cube(cube: Cube, live: bool = False):
     else:
         fig, _ = draw_cube_net(cube.state)
         fig.tight_layout()
-        plt.show()
+        plt.show(block=True)
