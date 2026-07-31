@@ -180,18 +180,16 @@ def up_cross(cube: Cube):
             break
     else:
         return
-    for ((r1, c1), (r2, c2)), ref_face in mappings.UP_CROSS_CORNERS.items():
-        if up_state[r1][c1] == "U" and up_state[r2][c2] == "U":
-            cube.apply_algorithm(
-                Algorithm("F U R U' R' F'", translation_reference=ref_face)
-            )
-            return
-    for ((r1, c1), (r2, c2)), ref_face in mappings.UP_CROSS_LINES.items():
-        if up_state[r1][c1] == "U" and up_state[r2][c2] == "U":
-            cube.apply_algorithm(
-                Algorithm("R U R' U' R' F R F'", translation_reference=ref_face)
-            )
-            return
+    for pattern, algorithm in (
+        (mappings.UP_CROSS_CORNERS, "F U R U' R' F'"),
+        (mappings.UP_CROSS_LINES, "R U R' U' R' F R F'"),
+    ):
+        for ((r1, c1), (r2, c2)), ref_face in pattern.items():
+            if up_state[r1][c1] == "U" and up_state[r2][c2] == "U":
+                cube.apply_algorithm(
+                    Algorithm(algorithm, translation_reference=ref_face)
+                )
+                return
     cube.apply_algorithm(Algorithm("R U2 R2 F R F' U2 R' F R F'"))
 
 
