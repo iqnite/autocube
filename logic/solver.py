@@ -13,6 +13,7 @@ def solve_cube(cube: Cube):
 
 def down_cross(cube: Cube):
     correct = 0
+    non_bleeding_u_edges = 0
     while correct < 4:
         correct = 0
         white_edges = cube.get_edges_of_color(color="D")
@@ -27,10 +28,14 @@ def down_cross(cube: Cube):
                 break
             if face == "U":
                 if cube.edge_is_bleeding(edge):
+                    non_bleeding_u_edges = 0
                     cube.apply_algorithm(Algorithm(f"{adj_face}2"))
                     break
-                cube.apply_algorithm(Algorithm("U"))
-                break
+                non_bleeding_u_edges += 1
+                if non_bleeding_u_edges >= 4:
+                    non_bleeding_u_edges = 0
+                    cube.apply_algorithm(Algorithm("U"))
+                    break
             if face in ["L", "R", "F", "B"]:
                 if adj_face == "D":
                     cube.apply_algorithm(Algorithm(f"{face}2"))
@@ -158,6 +163,7 @@ def center_edges(cube: Cube):
             cube.apply_algorithm(Algorithm("U"))
             up_rotations += 1
             if up_rotations >= 4:
+                up_rotations = 0
                 # If no edges are in the up layer, move one there
                 face, adj_face = unsolved_edges[0]
                 cube.apply_algorithm(
@@ -170,7 +176,6 @@ def center_edges(cube: Cube):
                         face,
                     )
                 )
-                up_rotations = 0
 
 
 def up_cross(cube: Cube):
