@@ -2,7 +2,7 @@ import json
 import re
 from enum import Enum
 
-from logic.constants import BANDS, CORNER_MAP, EDGE_MAP, TRANSLATION_MAPPING
+from logic.mappings import BANDS, CORNER_MAP, EDGE_MAP, TRANSLATION_MAPPING
 
 
 class Face(Enum):
