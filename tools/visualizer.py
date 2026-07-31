@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 
 from logic.cube import Cube
 
@@ -31,8 +31,8 @@ def draw_cube_net(cube_state: dict[str, list[list[str]]], ax=None):
     color_map = {
         "D": "#FFFFFF",  # White
         "U": "#FFD500",  # Yellow
-        "R": "#C41E3A",  # Red
-        "L": "#FF5800",  # Orange
+        "R": "#FF5800",  # Orange
+        "L": "#C41E3A",  # Red
         "F": "#009E60",  # Green
         "B": "#0051BA",  # Blue
     }
