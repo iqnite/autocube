@@ -2,7 +2,7 @@ import json
 import re
 from enum import Enum
 
-from logic.constants import BANDS, CORNER_MAP, EDGE_MAP
+from logic.constants import BANDS, CORNER_MAP, EDGE_MAP, TRANSLATION_MAPPING
 
 
 class Face(Enum):
@@ -161,16 +161,10 @@ class Algorithm:
     def translate_move(move: str, reference_front: str) -> str:
         if move[0] in "UD":
             return move
-        face_mapping = {
-            "F": {"F": "F", "B": "B", "L": "L", "R": "R"},
-            "B": {"F": "B", "B": "F", "L": "R", "R": "L"},
-            "L": {"F": "L", "B": "R", "L": "B", "R": "F"},
-            "R": {"F": "R", "B": "L", "L": "F", "R": "B"},
-        }
         return (
-            face_mapping[reference_front][move[0]] + move[1:]
+            TRANSLATION_MAPPING[reference_front][move[0]] + move[1:]
             if len(move) > 1
-            else face_mapping[reference_front][move[0]]
+            else TRANSLATION_MAPPING[reference_front][move[0]]
         )
 
     class CubeRotation(Enum):
