@@ -16,7 +16,7 @@ class Face(Enum):
 
 class Cube:
     def __init__(self, state=None, on_move=None):
-        self.state = state or {
+        self.state: dict[str, list[list[str]]] = state or {
             face.value: [[face.value for _ in range(3)] for _ in range(3)]
             for face in Face
         }
