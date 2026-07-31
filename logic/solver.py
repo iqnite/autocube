@@ -1,13 +1,14 @@
 from typing import Literal
 
+from logic import mappings
 from logic.cube import Algorithm, Cube, Facelet
-from logic.mappings import FRONT_FACE_FOR_CORNER, RIGHT_EDGE_INSERTIONS
 
 
 def solve_cube(cube: Cube):
     down_cross(cube)
     down_corners(cube)
     center_edges(cube)
+    up_cross(cube)
 
 
 def down_cross(cube: Cube):
@@ -97,7 +98,7 @@ def down_corners(cube: Cube):
 
         unsolved_corners.sort(key=lambda x: sorted(x["colors"]))
         target = unsolved_corners[0]
-        front_face = FRONT_FACE_FOR_CORNER[frozenset(target["side_faces"])]
+        front_face = mappings.FRONT_FACE_FOR_CORNER[frozenset(target["side_faces"])]
         in_bottom_layer = target["face"] == "D" or "D" in target["adj_faces"]
         if in_bottom_layer:
             cube.apply_algorithm(
@@ -132,12 +133,7 @@ def center_edges(cube: Cube):
             unsolved_edges.append(frozenset((face, adj_face)))
         if not unsolved_edges:
             break
-        up_edges = list(
-            map(
-                lambda args: Facelet(*args),
-                (("U", 0, 1), ("U", 1, 0), ("U", 1, 2), ("U", 2, 1)),
-            )
-        )
+        up_edges = list(map(lambda args: Facelet(*args), mappings.UP_EDGES))
         for edge in up_edges:
             edge_colors = (
                 cube.state[edge.face][edge.row][edge.col],
@@ -151,7 +147,7 @@ def center_edges(cube: Cube):
                         insert_edge(
                             (
                                 "right"
-                                if (face, adj_face) in RIGHT_EDGE_INSERTIONS
+                                if (face, adj_face) in mappings.RIGHT_EDGE_INSERTIONS
                                 else "left"
                             ),
                             face,
@@ -168,13 +164,35 @@ def center_edges(cube: Cube):
                     insert_edge(
                         (
                             "right"
-                            if (face, adj_face) in RIGHT_EDGE_INSERTIONS
+                            if (face, adj_face) in mappings.RIGHT_EDGE_INSERTIONS
                             else "left"
                         ),
                         face,
                     )
                 )
                 up_rotations = 0
+
+
+def up_cross(cube: Cube):
+    up_state = cube.state["U"]
+    for _, row, col in mappings.UP_EDGES:
+        if up_state[row][col] != "U":
+            break
+    else:
+        return
+    for ((r1, c1), (r2, c2)), ref_face in mappings.UP_CROSS_CORNERS.items():
+        if up_state[r1][c1] == "U" and up_state[r2][c2] == "U":
+            cube.apply_algorithm(
+                Algorithm("F U R U' R' F'", translation_reference=ref_face)
+            )
+            return
+    for ((r1, c1), (r2, c2)), ref_face in mappings.UP_CROSS_LINES.items():
+        if up_state[r1][c1] == "U" and up_state[r2][c2] == "U":
+            cube.apply_algorithm(
+                Algorithm("R U R' U' R' F R F'", translation_reference=ref_face)
+            )
+            return
+    cube.apply_algorithm(Algorithm("R U2 R2 F R F' U2 R' F R F'"))
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:
