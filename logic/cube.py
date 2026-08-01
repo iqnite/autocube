@@ -24,7 +24,31 @@ class Cube:
 
     @classmethod
     def from_json(cls, json_data, on_move=None):
+        cls.validate_json(json_data)
         return cls(state=json_data.get("faces"), on_move=on_move)
+
+    @staticmethod
+    def validate_json(json_data: dict):
+        faces = json_data.get("faces")
+        if faces is None:
+            raise ValueError("No 'faces' attribute found.")
+        if len(faces) != 6:
+            raise ValueError(f"Expected 6 faces, found {len(faces)}.")
+        for face, rows in faces.items():
+            if len(rows) != 3:
+                raise ValueError(
+                    f"Expected 3 rows on each face, found {len(rows)} on '{face}' face."
+                )
+            for row in rows:
+                if len(row) != 3:
+                    raise ValueError(
+                        f"Expected 3 facelet in each row, found {len(row)} on '{face}' face."
+                    )
+                for facelet in row:
+                    if facelet not in Face:
+                        raise ValueError(
+                            "Colors must be one of the following: U, D, R, L, F, B."
+                        )
 
     def to_json(self):
         return json.dumps(self.state, indent=2)
