@@ -28,6 +28,8 @@ if __name__ == "__main__":
         cube.apply_algorithm(Algorithm(shuffle_moves))
         print("No file provided, solving random cube...")
     cube.on_move = lambda: visualize_cube(cube, live=True)
+    cube.move_history.clear()
     solve_cube(cube)
     print("Cube solved!")
+    print("Moves:", " ".join(cube.move_history))
     plt.show(block=True)

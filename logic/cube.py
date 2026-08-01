@@ -21,6 +21,7 @@ class Cube:
             for face in Face
         }
         self.on_move = on_move
+        self.move_history = []
 
     @classmethod
     def from_json(cls, json_data, on_move=None):
@@ -72,6 +73,7 @@ class Cube:
             self.state[edge.face][edge.row][edge.col] = val
 
     def apply_move(self, move: str):
+        self.move_history.append(move)
         clockwise = not move.endswith("'")
         face = move[0]
         self._rotate_matrix(face, clockwise)
