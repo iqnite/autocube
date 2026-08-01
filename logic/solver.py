@@ -5,14 +5,14 @@ from logic.cube import Algorithm, Cube, Facelet
 
 
 def solve_cube(cube: Cube):
-    l1_cross(cube)
-    l1_corners(cube)
-    l2(cube)
+    fl_cross(cube)
+    fl_corners(cube)
+    ml(cube)
     eoll(cube)
     ocll(cube)
 
 
-def l1_cross(cube: Cube):
+def fl_cross(cube: Cube):
     correct = 0
     non_bleeding_u_edges = 0
     while correct < 4:
@@ -65,7 +65,7 @@ def l1_cross(cube: Cube):
                 break
 
 
-def l1_corners(cube: Cube):
+def fl_corners(cube: Cube):
     while True:
         white_corners = cube.get_corners_of_color(color="D")
         unsolved_corners = []
@@ -124,7 +124,7 @@ def l1_corners(cube: Cube):
                 cube.apply_algorithm(Algorithm("U"))
 
 
-def l2(cube: Cube):
+def ml(cube: Cube):
     up_rotations = 0
     while True:
         unsolved_edges: list[frozenset[str]] = []
