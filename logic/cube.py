@@ -215,6 +215,8 @@ class Algorithm:
                 .replace("'2", "2")
                 .replace("2'", "2")
                 .replace("''", "")
+                .replace("  ", " ")
+                .replace("  ", " ")
             )
         return moves
 
