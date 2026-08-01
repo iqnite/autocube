@@ -31,5 +31,7 @@ if __name__ == "__main__":
     cube.move_history.clear()
     solve_cube(cube)
     print("Cube solved!")
-    print("Moves:", " ".join(cube.move_history))
+    history_algorithm = Algorithm(cube.move_history)
+    print("Moves:", history_algorithm)
+    print("Moves (optimized):", Algorithm.optimize_move_string(str(history_algorithm)))
     plt.show(block=True)

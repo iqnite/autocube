@@ -128,8 +128,13 @@ class Cube:
 
 
 class Algorithm:
-    def __init__(self, moves: str, translation_reference: str | None = None):
-        self.moves = list(self.parse(moves))
+    def __init__(
+        self, moves: str | list[str], translation_reference: str | None = None
+    ):
+        if isinstance(moves, str):
+            self.moves = list(self.parse(moves))
+        else:
+            self.moves = moves
         if translation_reference:
             self.moves = [
                 self.translate_move(move, translation_reference) for move in self.moves
@@ -192,6 +197,26 @@ class Algorithm:
             if len(move) > 1
             else TRANSLATION_MAPPING[reference_front][move[0]]
         )
+
+    def optimize(self) -> "Algorithm":
+        return Algorithm(self.optimize_move_string(str(self)))
+
+    @staticmethod
+    def optimize_move_string(moves: str) -> str:
+        moves = moves + " "
+        for move in Algorithm.CubeRotation:
+            move_str = move.value
+            moves = (
+                moves.replace(f"{move_str} " * 4, " ")
+                .replace(f"{move} {move}' ", " ")
+                .replace(f"{move}' {move} ", " ")
+                .replace(f"{move_str} " * 3, f"{move_str}' ")
+                .replace("''", "")
+                .replace("'2", "2")
+                .replace("2'", "2")
+                .replace(f"{move_str} " * 2, f"{move_str}2 ")
+            )
+        return moves
 
     class CubeRotation(Enum):
         U = "U"
