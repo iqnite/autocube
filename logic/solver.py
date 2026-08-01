@@ -10,6 +10,7 @@ def solve_cube(cube: Cube):
     ml(cube)
     eoll(cube)
     ocll(cube)
+    cpll(cube)
 
 
 def fl_cross(cube: Cube):
@@ -210,6 +211,23 @@ def ocll(cube: Cube):
             return
         cube.apply_algorithm(Algorithm("U"))
     raise RuntimeError("Cannot find solution for last layer corners.")
+
+
+def cpll(cube: Cube):
+    headlights_found = 0
+    headlights_face = None
+    for face in ("F", "B", "R", "L"):
+        if cube.state[face][0][0] == cube.state[face][0][2]:
+            headlights_found += 1
+            if headlights_found > 1:
+                return
+            headlights_face = face
+    if headlights_found == 1:
+        cube.apply_algorithm(
+            Algorithm("U' R2 B2 R F R' B2 R F' R", translation_reference=headlights_face)
+        )
+        return
+    cube.apply_algorithm(Algorithm("F R U' R' U' R U R' F' R U R' U' R' F R F'"))
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:
