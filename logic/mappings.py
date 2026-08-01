@@ -185,3 +185,13 @@ UP_CROSS_LINES = {
     ((1, 0), (1, 2)): "F",
     ((0, 1), (2, 1)): "L",
 }
+
+UP_CORNER_ALGORITHMS = {
+    (0, 2, 6): "R' U2 R U R' U R",
+    (3, 5, 7): "R U2 R' U' R U' R'",
+    (4, 7): "F' L F R' F' L' F R",
+    (0, 5): "L F R' F' L' F R F'",
+    (1, 4, 6, 7): "R U2 R2 U' R2 U' R2 U2 R",
+    (2, 3, 6, 7): "R U R' U R U' R' U R U2 R'",
+    (4, 5): "R2 D R' U2 R D' R' U2 R'",
+}

@@ -9,6 +9,7 @@ def solve_cube(cube: Cube):
     l1_corners(cube)
     l2(cube)
     eoll(cube)
+    ocll(cube)
 
 
 def l1_cross(cube: Cube):
@@ -196,6 +197,19 @@ def eoll(cube: Cube):
                 )
                 return
     cube.apply_algorithm(Algorithm("R U2 R2 F R F' U2 R' F R F'"))
+
+
+def ocll(cube: Cube):
+    for _ in range(3):
+        up_adj_colors = tuple(
+            cube.state[face][0][col] for face in ("B", "R", "F", "L") for col in (2, 0)
+        )
+        adj_ups = tuple(i for i, color in enumerate(up_adj_colors) if color == "U")
+        if adj_ups in mappings.UP_CORNER_ALGORITHMS:
+            cube.apply_algorithm(Algorithm(mappings.UP_CORNER_ALGORITHMS[adj_ups]))
+            return
+        cube.apply_algorithm(Algorithm("U"))
+    raise RuntimeError("Cannot find solution for last layer corners.")
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:
