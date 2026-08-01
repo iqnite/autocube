@@ -206,6 +206,8 @@ def ocll(cube: Cube):
             cube.state[face][0][col] for face in ("B", "R", "F", "L") for col in (2, 0)
         )
         adj_ups = tuple(i for i, color in enumerate(up_adj_colors) if color == "U")
+        if len(adj_ups) == 0:
+            return
         if adj_ups in mappings.UP_CORNER_ALGORITHMS:
             cube.apply_algorithm(Algorithm(mappings.UP_CORNER_ALGORITHMS[adj_ups]))
             return
