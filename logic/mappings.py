@@ -195,3 +195,12 @@ UP_CORNER_ALGORITHMS = {
     (2, 3, 6, 7): "R U R' U R U' R' U R U2 R'",
     (4, 5): "R2 D R' U2 R D' R' U2 R'",
 }
+
+OPPOSITE_FACES = {
+    "U": "D",
+    "D": "U",
+    "F": "B",
+    "B": "F",
+    "R": "L",
+    "L": "R",
+}
