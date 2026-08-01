@@ -200,7 +200,7 @@ def eoll(cube: Cube):
 
 
 def ocll(cube: Cube):
-    for _ in range(3):
+    for _ in range(4):
         up_adj_colors = tuple(
             cube.state[face][0][col] for face in ("B", "R", "F", "L") for col in (2, 0)
         )
