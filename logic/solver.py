@@ -12,6 +12,7 @@ def solve_cube(cube: Cube):
     ocll(cube)
     cpll(cube)
     epll(cube)
+    last_rotation(cube)
 
 
 def fl_cross(cube: Cube):
@@ -238,6 +239,25 @@ def cpll(cube: Cube):
 def epll(cube: Cube):
     for face in ("F", "B", "R", "L"):
         right_face = mappings.EDGE_MAP[(face, 1, 2)][0]
+        if (
+            cube.state[face][0][0] == cube.state[mappings.OPPOSITE_FACES[face]][0][1]
+            and cube.state[face][0][1]
+            == cube.state[mappings.OPPOSITE_FACES[face]][0][0]
+        ):
+            cube.apply_algorithm(
+                Algorithm("R2 L2 D R2 L2 D2 R2 L2 D R2 L2 D2", translation_reference=face)
+            )
+            return
+        if (
+            cube.state[face][0][1] == cube.state[right_face][0][0]
+            and cube.state[face][0][0] == cube.state[right_face][0][1]
+        ):
+            cube.apply_algorithm(
+                Algorithm(
+                    "R' U' R2 U R U R' U' R U R U' R U' R'", translation_reference=face
+                )
+            )
+            return
         if cube.state[face][0][0] == cube.state[face][0][1]:
             if (
                 cube.state[mappings.OPPOSITE_FACES[face]][0][0]
@@ -258,23 +278,12 @@ def epll(cube: Cube):
                 Algorithm("R2 U' R' U' R U R U R U' R", translation_reference=face)
             )
             return
-        if (
-            cube.state[face][0][0] == cube.state[mappings.OPPOSITE_FACES[face]][0][1]
-            and cube.state[face][0][1]
-            == cube.state[mappings.OPPOSITE_FACES[face]][0][0]
-        ):
-            cube.apply_algorithm(
-                Algorithm("R2 L2 D R2 L2 D2 R2 L2 D R2 L2", translation_reference=face)
-            )
-            return
-        if cube.state[face][0][1] == cube.state[right_face][0][0]:
-            cube.apply_algorithm(
-                Algorithm(
-                    "R' U' R2 U R U R' U' R U R U' R U' R'", translation_reference=face
-                )
-            )
-            return
     raise RuntimeError("Cannot find solution for last layer edge orientation.")
+
+
+def last_rotation(cube: Cube):
+    while cube.state["F"][0][0] != "F":
+        cube.apply_algorithm(Algorithm("U"))
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:
