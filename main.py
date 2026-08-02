@@ -14,6 +14,8 @@ if __name__ == "__main__":
     parser = ArgumentParser(
         prog="Autocube",
         description="Solve a Rubik's cube from a JSON file.",
+        epilog="If no file is supplied, a random cube will be solved."
+        " If only moves are supplied, they will be performed on a solved cube.",
         add_help=True,
         allow_abbrev=True,
         suggest_on_error=True,
@@ -23,8 +25,16 @@ if __name__ == "__main__":
         metavar="PATH",
         nargs="?",
         type=str,
-        help="A JSON file containing a Rubik's cube state."
-        " If omitted, a random cube will be solved instead.",
+        help="path to a JSON file containing a Rubik's cube state",
+    )
+    parser.add_argument(
+        "-m",
+        "--moves",
+        dest="moves",
+        metavar='"MOVE1 MOVE2 ..."',
+        type=str,
+        required=False,
+        help="perform custom moves on the cube and print the state afterwards",
     )
     parser.add_argument(
         "-l",
@@ -35,7 +45,7 @@ if __name__ == "__main__":
         type=bool,
         default=False,
         const=True,
-        help="Show the solution steps live. Will drastically reduce performance.",
+        help="show the solution steps live (reduces performance)",
     )
     parser.add_argument(
         "-q",
@@ -46,7 +56,7 @@ if __name__ == "__main__":
         type=bool,
         default=False,
         const=True,
-        help="Only print the optimized moves.",
+        help="only print the optimized moves (or state if used with --moves)",
     )
     args = parser.parse_args()
     if args.file is not None:
@@ -62,27 +72,38 @@ if __name__ == "__main__":
             print(f"ERROR: {e}")
             sys.exit(1)
         if not args.quiet:
-            print(f"Solving cube from {file_path}...")
+            print(f"Using cube from {file_path}...")
     else:
         cube = Cube()
-        shuffle_moves = " ".join(random.choices(["U", "D", "L", "R", "F", "B"], k=40))
-        cube.apply_algorithm(Algorithm(shuffle_moves))
+        if not args.moves:
+            shuffle_moves = " ".join(
+                random.choices(["U", "D", "L", "R", "F", "B"], k=40)
+            )
+            cube.apply_algorithm(Algorithm(shuffle_moves))
         if not args.quiet:
-            print("No file provided, solving random cube...")
+            print("No file provided, using random cube...")
     if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
     cube.move_history.clear()
     start_time = time.time()
-    solve_cube(cube)
+    if args.moves:
+        cube.apply_algorithm(Algorithm(args.moves))
+    else:
+        solve_cube(cube)
     duration = time.time() - start_time
     if not args.quiet:
-        print(f"Cube solved in {duration:.2f}s!")
-    history_algorithm = Algorithm(cube.move_history)
-    if not args.quiet:
-        print("Moves:", history_algorithm)
-    if not args.quiet:
-        print("Moves (optimized): ", end="")
-    print(Algorithm.optimize_move_string(str(history_algorithm)))
+        print(f"Finished in {duration:.2f}s!")
+    if not args.moves:
+        history_algorithm = Algorithm(cube.move_history)
+        if not args.quiet:
+            print("Moves:", history_algorithm)
+        if not args.quiet:
+            print("Moves (optimized): ", end="")
+        print(Algorithm.optimize_move_string(str(history_algorithm)))
     if not args.live and not args.quiet:
         visualize_cube(cube)
+    if args.moves:
+        if not args.quiet:
+            print("Cube state:")
+        print(cube.to_json())
     plt.show(block=True)
