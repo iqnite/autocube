@@ -1,6 +1,7 @@
 import json
 import random
 import sys
+import time
 from argparse import ArgumentParser
 
 from matplotlib import pyplot as plt
@@ -26,19 +27,19 @@ if __name__ == "__main__":
         " If omitted, a random cube will be solved instead.",
     )
     parser.add_argument(
-        "--live",
         "-l",
+        "--live",
         dest="live",
         metavar="",
         nargs="?",
         type=bool,
         default=False,
         const=True,
-        help="Show the solution steps live.",
+        help="Show the solution steps live. Will drastically reduce performance.",
     )
     parser.add_argument(
-        "--quiet",
         "-q",
+        "--quiet",
         dest="quiet",
         metavar="",
         nargs="?",
@@ -71,9 +72,11 @@ if __name__ == "__main__":
     if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
     cube.move_history.clear()
+    start_time = time.time()
     solve_cube(cube)
+    duration = time.time() - start_time
     if not args.quiet:
-        print("Cube solved!")
+        print(f"Cube solved in {duration:.2f}s!")
     history_algorithm = Algorithm(cube.move_history)
     if not args.quiet:
         print("Moves:", history_algorithm)
