@@ -2,7 +2,11 @@
 
 Autocube is a work-in-progress 3x3x3 Rubik's cube solver. Right now, it takes a file path from the command line and outputs the solution moves. Code for auto-solving with LEGO Mindstorms EV3 robots will be added soon.
 
-## Installation
+## Script
+
+<video controls src=".github/readme-assets/demo.mp4" title="Demo video"></video>
+
+### Installation
 
 To use the script, download it from the [Releases](https://github.com/iqnite/autocube/releases/latest/) page...
 
@@ -14,11 +18,11 @@ cd autocube
 pip install -r requirements.txt
 ```
 
-## Script usage
+### Usage
 
 The autocube script can be used to solve and manipulate Rubik's cubes, represented as JSON files. Run `autocube -h` in the terminal to get an overview of the available options. Run `autocube --live` for a demo.
 
-### Cubes
+#### Solving cubes
 
 A Rubik's cube is represented as JSON file. The `faces` attribute contains the cube's state, consisting of a 3x3 array for each of the 6 faces. An example with a fully solved cube can be found at [examples/solved.json](examples/solved.json).
 
@@ -30,7 +34,7 @@ autocube --file examples/unsolved.json
 
 This will print the solution steps to the terminal, along with other useful info. If only the solution steps are needed, the `--quiet` option can be used. This is especially useful if the solution algorithm needs to be piped into another program.
 
-### Algorithms
+#### Performing algorithms
 
 Colors and rotations are mapped to the letters used in standard notation:
 
@@ -57,11 +61,15 @@ autocube --moves "U R U' R'" --file examples/unsolved.json
 
 By default, the `--moves` prints the same output as the one printed with the `--file` option, plus the final cube state in JSON format. If the `--quiet` option is passed too, only the state will be printed.
 
-### Live mode
+#### Live mode
 
 The `--live` option shows every move in real time on a flattened representation of the cube. If used with the `--quiet` option, the window will be closed as soon as the algorithms finishes, otherwise it will stay open and block the script until it is closed manually.
 
 Note that the live view will drastically increase solution times, since performance is limited by the screen's framerate.
+
+## Hardware
+
+Coming soon!
 
 ## Credits
 
