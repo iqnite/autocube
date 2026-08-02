@@ -26,7 +26,26 @@ if __name__ == "__main__":
         " If omitted, a random cube will be solved instead.",
     )
     parser.add_argument(
-        "--live", nargs="?", type=bool, help="Show the solution steps live."
+        "--live",
+        "-l",
+        dest="live",
+        metavar="",
+        nargs="?",
+        type=bool,
+        default=False,
+        const=True,
+        help="Show the solution steps live.",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-q",
+        dest="quiet",
+        metavar="",
+        nargs="?",
+        type=bool,
+        default=False,
+        const=True,
+        help="Only print the optimized moves.",
     )
     args = parser.parse_args()
     if args.file is not None:
@@ -41,20 +60,26 @@ if __name__ == "__main__":
         except (json.JSONDecodeError, ValueError) as e:
             print(f"ERROR: {e}")
             sys.exit(1)
-        print(f"Solving cube from {file_path}...")
+        if not args.quiet:
+            print(f"Solving cube from {file_path}...")
     else:
         cube = Cube()
         shuffle_moves = " ".join(random.choices(["U", "D", "L", "R", "F", "B"], k=40))
         cube.apply_algorithm(Algorithm(shuffle_moves))
-        print("No file provided, solving random cube...")
+        if not args.quiet:
+            print("No file provided, solving random cube...")
     if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
     cube.move_history.clear()
     solve_cube(cube)
-    print("Cube solved!")
+    if not args.quiet:
+        print("Cube solved!")
     history_algorithm = Algorithm(cube.move_history)
-    print("Moves:", history_algorithm)
-    print("Moves (optimized):", Algorithm.optimize_move_string(str(history_algorithm)))
-    if not args.live:
+    if not args.quiet:
+        print("Moves:", history_algorithm)
+    if not args.quiet:
+        print("Moves (optimized): ", end="")
+    print(Algorithm.optimize_move_string(str(history_algorithm)))
+    if not args.live and not args.quiet:
         visualize_cube(cube)
     plt.show(block=True)
