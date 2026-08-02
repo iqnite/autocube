@@ -115,7 +115,7 @@ if __name__ == "__main__":
     if args.moves:
         if not args.quiet:
             print("Cube state:")
-        print('{"faces":\n' + cube.to_json() + "\n}")
+        print(cube.to_json())
     if not args.live and not args.quiet:
         visualize_cube(cube)
     if not args.quiet:

@@ -56,7 +56,7 @@ class Cube:
                         )
 
     def to_json(self):
-        return json.dumps(self.state, indent=2)
+        return json.dumps({"faces": self.state}, indent=2)
 
     def _rotate_matrix(self, face: str, clockwise: bool):
         grid = self.state[face]
