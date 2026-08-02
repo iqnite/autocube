@@ -25,7 +25,8 @@ if __name__ == "__main__":
         suggest_on_error=True,
     )
     parser.add_argument(
-        "file",
+        "-f",
+        "--file",
         metavar="PATH",
         nargs="?",
         type=str,
@@ -117,4 +118,5 @@ if __name__ == "__main__":
         print('{"faces":\n' + cube.to_json() + "\n}")
     if not args.live and not args.quiet:
         visualize_cube(cube)
-    plt.show(block=True)
+    if not args.quiet:
+        plt.show(block=True)
