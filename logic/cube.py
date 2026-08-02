@@ -1,3 +1,7 @@
+"""
+Contains representations of Cubes and Algorithms, with helper methods for manipulation.
+"""
+
 import json
 import re
 from enum import Enum

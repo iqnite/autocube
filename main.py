@@ -1,3 +1,7 @@
+"""
+Entry point for the command line solver script.
+"""
+
 import json
 import random
 import sys

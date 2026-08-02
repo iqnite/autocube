@@ -1,3 +1,7 @@
+"""
+Contains functions for solving every layer of the cube.
+"""
+
 from typing import Literal
 
 from logic import mappings

@@ -1,3 +1,7 @@
+"""
+Contains various mappings used for cubes representation and solution.
+"""
+
 CORNER_MAP = {
     # Up-Front-Left
     ("U", 2, 0): (("F", 0, 0), ("L", 0, 2)),

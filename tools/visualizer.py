@@ -1,3 +1,7 @@
+"""
+Contains functions used to visualize cubes.
+"""
+
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
