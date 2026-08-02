@@ -116,7 +116,7 @@ if __name__ == "__main__":
         if not args.quiet:
             print("Cube state:")
         print(cube.to_json())
-    if not args.live and not args.quiet:
+    if not args.live and not args.quiet and args.moves:
         visualize_cube(cube)
     if not args.quiet:
         plt.show(block=True)
