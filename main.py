@@ -1,6 +1,7 @@
 import json
 import random
 import sys
+from argparse import ArgumentParser
 
 from matplotlib import pyplot as plt
 
@@ -9,8 +10,27 @@ from logic.solver import solve_cube
 from tools.visualizer import visualize_cube
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] != "--live":
-        file_path = sys.argv[1]
+    parser = ArgumentParser(
+        prog="Autocube",
+        description="Solve a Rubik's cube from a JSON file.",
+        add_help=True,
+        allow_abbrev=True,
+        suggest_on_error=True,
+    )
+    parser.add_argument(
+        "file",
+        metavar="PATH",
+        nargs="?",
+        type=str,
+        help="A JSON file containing a Rubik's cube state."
+        " If omitted, a random cube will be solved instead.",
+    )
+    parser.add_argument(
+        "--live", nargs="?", type=bool, help="Show the solution steps live."
+    )
+    args = parser.parse_args()
+    if args.file is not None:
+        file_path = args.file
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 json_data = json.load(f)
@@ -27,8 +47,7 @@ if __name__ == "__main__":
         shuffle_moves = " ".join(random.choices(["U", "D", "L", "R", "F", "B"], k=40))
         cube.apply_algorithm(Algorithm(shuffle_moves))
         print("No file provided, solving random cube...")
-    live = "--live" in sys.argv
-    if live:
+    if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
     cube.move_history.clear()
     solve_cube(cube)
@@ -36,6 +55,6 @@ if __name__ == "__main__":
     history_algorithm = Algorithm(cube.move_history)
     print("Moves:", history_algorithm)
     print("Moves (optimized):", Algorithm.optimize_move_string(str(history_algorithm)))
-    if not live:
+    if not args.live:
         visualize_cube(cube)
     plt.show(block=True)
