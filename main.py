@@ -95,11 +95,15 @@ if __name__ == "__main__":
         print(f"Finished in {duration:.2f}s!")
     if not args.moves:
         history_algorithm = Algorithm(cube.move_history)
+        optimized_algorithm = Algorithm.optimize_move_string(str(history_algorithm))
+        prev_move_count = len(history_algorithm.moves)
+        optimized_move_count = optimized_algorithm.count(" ")
+        move_ratio = optimized_move_count / prev_move_count
         if not args.quiet:
             print("Moves:", history_algorithm)
         if not args.quiet:
-            print("Moves (optimized): ", end="")
-        print(Algorithm.optimize_move_string(str(history_algorithm)))
+            print(f"Moves (optimized to {move_ratio*100:.0f}% of original): ", end="")
+        print(optimized_algorithm)
     if not args.live and not args.quiet:
         visualize_cube(cube)
     if args.moves:
