@@ -85,7 +85,7 @@ if __name__ == "__main__":
                 random.choices(["U", "D", "L", "R", "F", "B"], k=40)
             )
             cube.apply_algorithm(Algorithm(shuffle_moves))
-        if not args.quiet:
+        if not args.moves and not args.quiet:
             print("No file provided, using random cube...")
     if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
