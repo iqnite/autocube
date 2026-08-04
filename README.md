@@ -24,7 +24,7 @@ The autocube script can be used to solve and manipulate Rubik's cubes, represent
 
 #### Solving cubes
 
-A Rubik's cube is represented as JSON file. The `faces` attribute contains the cube's state, consisting of a 3x3 array for each of the 6 faces. An example with a fully solved cube can be found at [examples/solved.json](examples/solved.json).
+A Rubik's cube is represented by a JSON file. The `faces` attribute contains the cube's state, consisting of a 3x3 array for each of the 6 faces. An example with a fully solved cube can be found at [examples/solved.json](examples/solved.json).
 
 To solve a cube, pass the path to its JSON file to the `--file` (or `-f`) option of the script:
 
