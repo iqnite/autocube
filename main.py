@@ -93,10 +93,10 @@ if __name__ == "__main__":
         cube.on_move = lambda: visualize_cube(cube, live=True)
     start_time = time.time()
     solution = ""
-    if args.moves is not None and args.moves != "":
-        cube.apply_algorithm(Algorithm(args.moves))
-    else:
+    if args.moves is None:
         solution = solve_cube(cube)
+    elif args.moves != "":
+        cube.apply_algorithm(Algorithm(args.moves))
     duration = time.time() - start_time
     if not args.quiet:
         print(f"Finished in {duration:.2f}s!")
