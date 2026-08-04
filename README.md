@@ -61,6 +61,8 @@ autocube --moves "U R U' R'" --file examples/unsolved.json
 
 By default, the `--moves` prints the same output as the one printed with the `--file` option, plus the final cube state in JSON format. If the `--quiet` option is passed too, only the state will be printed.
 
+If `--moves` is used without arguments, the cube will be visualized in its original state.
+
 #### Live mode
 
 The `--live` option shows every move in real time on a flattened representation of the cube. If used with the `--quiet` option, the window will be closed as soon as the algorithms finishes, otherwise it will stay open and block the script until it is closed manually.
