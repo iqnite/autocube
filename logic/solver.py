@@ -8,7 +8,8 @@ from logic import mappings
 from logic.cube import Algorithm, Cube, Facelet
 
 
-def solve_cube(cube: Cube):
+def solve_cube(cube: Cube) -> str:
+    move_history_len = len(cube.move_history)
     fl_cross(cube)
     fl_corners(cube)
     ml(cube)
@@ -17,6 +18,9 @@ def solve_cube(cube: Cube):
     cpll(cube)
     epll(cube)
     last_rotation(cube)
+    return Algorithm.optimize_move_string(
+        str(Algorithm(cube.move_history[move_history_len:]))
+    )
 
 
 def fl_cross(cube: Cube):
@@ -249,7 +253,9 @@ def epll(cube: Cube):
             == cube.state[mappings.OPPOSITE_FACES[face]][0][0]
         ):
             cube.apply_algorithm(
-                Algorithm("R2 L2 D R2 L2 D2 R2 L2 D R2 L2 D2", translation_reference=face)
+                Algorithm(
+                    "R2 L2 D R2 L2 D2 R2 L2 D R2 L2 D2", translation_reference=face
+                )
             )
             return
         if (

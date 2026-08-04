@@ -89,29 +89,20 @@ if __name__ == "__main__":
             print("No file provided, using random cube...")
     if args.live:
         cube.on_move = lambda: visualize_cube(cube, live=True)
-    cube.move_history.clear()
     start_time = time.time()
+    solution = ""
     if args.moves:
         cube.apply_algorithm(Algorithm(args.moves))
     else:
-        solve_cube(cube)
+        solution = solve_cube(cube)
     duration = time.time() - start_time
     if not args.quiet:
         print(f"Finished in {duration:.2f}s!")
     if not args.moves:
-        history_algorithm = Algorithm(cube.move_history)
-        optimized_algorithm = Algorithm.optimize_move_string(str(history_algorithm))
-        prev_move_count = len(history_algorithm.moves)
-        if prev_move_count > 0:
-            optimized_move_count = optimized_algorithm.count(" ")
-            move_ratio = optimized_move_count / prev_move_count
+        if len(solution) > 0:
             if not args.quiet:
-                print("Moves:", history_algorithm)
-            if not args.quiet:
-                print(
-                    f"Moves (optimized to {move_ratio*100:.0f}% of original): ", end=""
-                )
-            print(optimized_algorithm)
+                print("Moves: ", end="")
+            print(solution)
     if args.moves:
         if not args.quiet:
             print("Cube state:")
