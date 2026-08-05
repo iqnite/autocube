@@ -4,7 +4,7 @@ Autocube is a work-in-progress 3x3x3 Rubik's cube solver. Right now, it takes a 
 
 ## Script
 
-[Demo video](.github/readme-assets/demo.mp4)
+[Demo video](https://youtu.be/HdCdrFA-3j8)
 
 ### Installation
 
