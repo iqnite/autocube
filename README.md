@@ -47,7 +47,7 @@ Colors and rotations are mapped to the letters used in standard notation:
 
 In algorithms, each rotation is separated by a space. Prime (counterclockwise) rotations are followed by an apostrophe (`'`), double rotations by a `2`.
 
-To apply an algorithm to a cube, use the `--moves` option:
+To apply an algorithm to a cube, use the `--moves` option. Make sure the algorithm is put in double quotes (`"`):
 
 ```bash
 autocube --moves "U R U' R'"
