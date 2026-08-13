@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 from logic.cube import Algorithm, Cube
 from logic.solver import solve_cube
-from tools.visualizer import visualize_cube
+from script.visualizer import visualize_cube
 
 if __name__ == "__main__":
     parser = ArgumentParser(

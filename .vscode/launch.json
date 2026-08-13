@@ -8,7 +8,7 @@
       "name": "main",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/main.py",
+      "program": "${workspaceFolder}/script/main.py",
       "console": "integratedTerminal",
       "args": "${command:pickArgs}"
     }
