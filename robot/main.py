@@ -16,6 +16,7 @@ PORT = 65432
 class Robot:
     def __init__(self):
         self.ev3 = EV3Brick()
+        self.color_sensor = ColorSensor(Port.S2)
         self.motor_yaw = Motor(Port.A)
         self.motor_roll = Motor(Port.B)
         self.motor_scanner = Motor(Port.C)
@@ -36,6 +37,13 @@ class Robot:
             if cmd_type == "m":
                 motor_id, speed, angle = args
                 self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
+                return
+            if cmd_type == "s":
+                sensor_id = args[0]
+                if sensor_id == "color":
+                    return str(self.color_sensor.color())
+                if sensor_id == "touch":
+                    return str(TouchSensor(Port.S1).pressed())
         except Exception as e:
             return "ERROR: " + str(e)
 
