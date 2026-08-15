@@ -42,7 +42,6 @@ class Robot:
 
 if __name__ == "__main__":
     robot = Robot()
-    robot.reset_motor_positions()
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # This setting prevents "Address already in use" errors if you restart the script quickly
