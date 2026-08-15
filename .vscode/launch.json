@@ -8,7 +8,7 @@
       "name": "main",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/script/main.py",
+      "program": "${workspaceFolder}/autocube_script.py",
       "console": "integratedTerminal",
       "args": "${command:pickArgs}"
     },

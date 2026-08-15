@@ -208,20 +208,25 @@ class Algorithm:
     @staticmethod
     def optimize_move_string(moves: str) -> str:
         moves = moves + " "
-        for move in Algorithm.CubeRotation:
-            move_str = move.value
-            moves = (
-                moves.replace(f"{move_str} " * 4, " ")
-                .replace(f"{move_str} " * 3, f"{move_str}' ")
-                .replace(f"{move} {move}' ", " ")
-                .replace(f"{move}' {move} ", " ")
-                .replace(f"{move_str} " * 2, f"{move_str}2 ")
-                .replace("'2", "2")
-                .replace("2'", "2")
-                .replace("''", "")
-                .replace("  ", " ")
-                .replace("  ", " ")
-            )
+        previous_length = len(moves)
+        while True:
+            for move in Algorithm.CubeRotation:
+                move_str = move.value
+                moves = (
+                    moves.replace(f"{move_str} " * 4, " ")
+                    .replace(f"{move_str} " * 3, f"{move_str}' ")
+                    .replace(f"{move} {move}' ", " ")
+                    .replace(f"{move}' {move} ", " ")
+                    .replace(f"{move_str} " * 2, f"{move_str}2 ")
+                    .replace("'2", "2")
+                    .replace("2'", "2")
+                    .replace("''", "")
+                    .replace("  ", " ")
+                    .replace("  ", " ")
+                )
+            if len(moves) == previous_length:
+                break
+            previous_length = len(moves)
         return moves
 
     class CubeRotation(Enum):
