@@ -19,13 +19,25 @@ class Robot:
         self.motor_yaw = Motor(Port.A)
         self.motor_roll = Motor(Port.B)
         self.motor_scanner = Motor(Port.C)
+        self.motors = {
+            "a": self.motor_yaw,
+            "b": self.motor_roll,
+            "c": self.motor_scanner,
+        }
 
     def reset_motor_positions(self):
         self.motor_yaw.run_until_stalled(-100)
         self.motor_scanner.run_until_stalled(500)
 
-    def execute_move(self, move):
-        print("Received command for motors:", move)
+    def execute_command(self, command):
+        print(command)
+        try:
+            cmd_type, *args = command.split()
+            if cmd_type == "m":
+                motor_id, speed, angle = args
+                self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
+        except Exception as e:
+            return "ERROR: " + str(e)
 
 
 if __name__ == "__main__":
@@ -48,9 +60,8 @@ if __name__ == "__main__":
                 if not data:
                     break  # Laptop disconnected
                 command = data.decode("utf-8").strip()
-                robot.execute_move(command)
-                wait(1000)
-                conn.send(b"DONE\n")
+                response = robot.execute_command(command)
+                conn.send(response.encode("utf-8") if response else b"OK")
         finally:
             conn.close()
     finally:
