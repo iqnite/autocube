@@ -38,6 +38,10 @@ class Robot:
                 motor_id, speed, angle = args
                 self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
                 return
+            if cmd_type == "t":
+                motor_id, speed, angle = args
+                self.motors[motor_id].run_target(int(speed), int(angle), wait=True)
+                return
             if cmd_type == "s":
                 sensor_id = args[0]
                 if sensor_id == "rgb":
