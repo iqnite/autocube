@@ -40,10 +40,8 @@ class Robot:
                 return
             if cmd_type == "s":
                 sensor_id = args[0]
-                if sensor_id == "color":
-                    return str(self.color_sensor.color())
-                if sensor_id == "touch":
-                    return str(TouchSensor(Port.S1).pressed())
+                if sensor_id == "rgb":
+                    return str(self.color_sensor.rgb())
         except Exception as e:
             return "ERROR: " + str(e)
 
