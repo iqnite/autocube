@@ -1,3 +1,4 @@
 {
-  "python-envs.defaultEnvManager": "ms-python.python:system"
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "ev3devBrowser.download.exclude": "{**/.*,**.pyc,**/__pycache__/**,build/**,dist/**,**/venv/**,examples/**,script/**,autocube.spec,README.md,LICENSE}"
 }

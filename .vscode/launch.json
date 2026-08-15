@@ -11,6 +11,13 @@
       "program": "${workspaceFolder}/script/main.py",
       "console": "integratedTerminal",
       "args": "${command:pickArgs}"
+    },
+    {
+      "name": "Download and Run",
+      "type": "ev3devBrowser",
+      "request": "launch",
+      "program": "/home/robot/${workspaceRootFolderName}/robot/main.py",
+      "interactiveTerminal": false
     }
   ]
 }
