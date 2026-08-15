@@ -1,5 +1,9 @@
 #!/usr/bin/env pybricks-micropython
 
+"""
+Main entry point for the EV3 robot.
+"""
+
 import socket
 
 from pybricks.ev3devices import ColorSensor, Motor, TouchSensor  # type: ignore

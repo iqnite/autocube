@@ -1,3 +1,7 @@
+"""
+Contains various mappings used for cube and motor translation.
+"""
+
 FACE_RELOCATION_MOVES = {
     "D": "",
     "B": "S T A A' A' S'",

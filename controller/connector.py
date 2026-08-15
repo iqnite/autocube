@@ -1,3 +1,7 @@
+"""
+Contains classes for interfacing the EV3 robot and manipulating the cube via the motors.
+"""
+
 import socket
 from typing import Literal
 

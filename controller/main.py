@@ -1,3 +1,7 @@
+"""
+Main entry point for the robot controller.
+"""
+
 import sys
 
 from controller.connector import CubeManipulator, Robot

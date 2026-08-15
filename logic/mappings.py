@@ -1,5 +1,5 @@
 """
-Contains various mappings used for cubes representation and solution.
+Contains various mappings used for cube representation and solution.
 """
 
 CORNER_MAP = {
