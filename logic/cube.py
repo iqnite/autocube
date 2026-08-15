@@ -242,9 +242,6 @@ class Algorithm:
         F_PRIME = "F'"
         B = "B"
         B_PRIME = "B'"
-        # Motor-specific rotations
-        A = "A"
-        A_PRIME = "A'"
 
 
 class Facelet:
