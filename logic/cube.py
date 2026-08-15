@@ -242,6 +242,9 @@ class Algorithm:
         F_PRIME = "F'"
         B = "B"
         B_PRIME = "B'"
+        # Motor-specific moves
+        LOCK = "S"
+        UNLOCK = "S'"
 
 
 class Facelet:
