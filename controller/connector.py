@@ -48,8 +48,7 @@ class Robot:
 
 
 class CubeManipulator:
-    def __init__(self, cube: Cube | None = None):
-        self.cube: Cube | None = cube
+    def __init__(self):
         self.face_locations = {
             "U": "U",
             "F": "F",

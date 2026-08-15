@@ -1,6 +1,7 @@
 import sys
 
-from controller.connector import Robot
+from controller.connector import CubeManipulator, Robot
+from logic.cube import Algorithm
 
 PORT = 65432
 
@@ -9,10 +10,11 @@ if __name__ == "__main__":
     with Robot(ev3_ip, PORT) as robot:
         robot.connect()
         while True:
-            user_input = input("Enter command (or 'q' to exit): ")
+            user_input = input("Enter algorithm (or 'q' to exit): ")
             if not user_input:
                 continue
             if user_input == "q":
                 break
-            response = robot.execute(user_input)
-            print(response.strip())
+            response = robot.apply_motor_algorithm(
+                CubeManipulator().cube_to_motor_algorithm(Algorithm(user_input))
+            )
