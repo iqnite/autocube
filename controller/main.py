@@ -10,10 +10,10 @@ if __name__ == "__main__":
         s.connect((ev3_ip, PORT))
         print("Connected successfully!\n")
         while True:
-            user_input = input("Enter command (or 'quit' to exit): ")
+            user_input = input("Enter command (or 'q' to exit): ")
             if not user_input:
                 continue
-            if user_input == "quit":
+            if user_input == "q":
                 break
             s.sendall(user_input.encode("utf-8"))
             response = s.recv(1024)
