@@ -45,6 +45,12 @@ class Robot:
         response = self.socket.recv(1024)
         return response.decode("utf-8")
 
+    def apply_manipulations(self, manipulator: "CubeManipulator"):
+        if manipulator._moves_to_apply:
+            algorithm = Algorithm(" ".join(manipulator._moves_to_apply))
+            self.apply_motor_algorithm(algorithm)
+            manipulator._moves_to_apply.clear()
+
     def apply_motor_algorithm(self, algorithm: Algorithm):
         commands = []
         merged_moves = algorithm.merge_repeated_moves()
@@ -77,10 +83,9 @@ class CubeManipulator:
             "L": "L",
             "R": "R",
         }
-        self._move_history = []
+        self._moves_to_apply = []
 
     def cube_to_motor_algorithm(self, algorithm: Algorithm) -> Algorithm:
-        self._move_history = []
         for move in algorithm.moves:
             face = move[0]
             if face not in self.face_locations:
@@ -88,14 +93,14 @@ class CubeManipulator:
             target_face = self.face_locations[face]
             modifier = "" if "'" in move else "'"
             self.bring_face_down(target_face)
-            self._move_history.append("S")
-            self._move_history.append(f"V{modifier}")
-            self._move_history.append("S'")
-        return Algorithm(self._move_history).optimize()
+            self._moves_to_apply.append("S")
+            self._moves_to_apply.append(f"V{modifier}")
+            self._moves_to_apply.append("S'")
+        return Algorithm(self._moves_to_apply).optimize()
 
-    def _apply_motor_algorithm(self, algorithm: Algorithm):
+    def _stage_motor_algorithm(self, algorithm: Algorithm):
         for move in algorithm.moves:
-            self._move_history.append(move)
+            self._moves_to_apply.append(move)
             if move == "T":
                 self._tilt_cube()
             elif move in ("V", "V'"):
@@ -113,7 +118,22 @@ class CubeManipulator:
             moves = "V'" + moves
         elif face == "L":
             moves = "V" + moves
-        self._apply_motor_algorithm(Algorithm(moves))
+        self._stage_motor_algorithm(Algorithm(moves))
+
+    def bring_face_front(self, face: str):
+        if face == "F":
+            return
+        if face == "D":
+            moves = "S T A A' A' S'"
+        elif face == "U":
+            moves = "S T A A' A' S' V2"
+        elif face == "B":
+            moves = "V2"
+        elif face == "R":
+            moves = "V'"
+        else:  # face == "L"
+            moves = "V"
+        self._stage_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
         for face, current_pos in self.face_locations.items():
@@ -159,17 +179,23 @@ class CubeScanner:
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
             self.robot.scan_color(0)
+        self.cube_manipulator.bring_face_down("D")
+        self.cube_manipulator.bring_face_front("F")
+        self.robot.apply_manipulations(self.cube_manipulator)
         return Cube(cube_state)
 
     def calibrate(self):
         faces = mappings.FACE_SCAN_ORDER
         self.calibration = {face: self.scan_face_position(face, 3) for face in faces}
+        self.cube_manipulator.bring_face_down("D")
+        self.cube_manipulator.bring_face_front("F")
+        self.robot.apply_manipulations(self.cube_manipulator)
 
     def scan_face_position(
         self, face: str, position: int
     ) -> tuple[float, float, float]:
         self.cube_manipulator.bring_face_down(logic_mappings.OPPOSITE_FACES[face])
-        self.robot.apply_motor_algorithm(Algorithm(self.cube_manipulator._move_history))
+        self.robot.apply_manipulations(self.cube_manipulator)
         return self.robot.scan_color(position)
 
     def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
