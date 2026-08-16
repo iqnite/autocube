@@ -261,6 +261,8 @@ class Algorithm:
         B = "B"
         B_PRIME = "B'"
         # Motor-specific moves
+        VERTICAL_ROTATE = "V"
+        VERTICAL_ROTATE_PRIME = "V'"
         LOCK = "S"
         UNLOCK = "S'"
 

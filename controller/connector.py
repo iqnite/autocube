@@ -81,7 +81,7 @@ class CubeManipulator:
             modifier = "" if "'" in move else "'"
             self._bring_face_down(target_face)
             self._move_history.append("S")
-            self._move_history.append(f"B{modifier}")
+            self._move_history.append(f"V{modifier}")
             self._move_history.append("S'")
         return Algorithm(self._move_history).optimize()
 
@@ -90,7 +90,7 @@ class CubeManipulator:
             self._move_history.append(move)
             if move == "T":
                 self._tilt_cube()
-            elif move in ("B", "B'"):
+            elif move in ("V", "V'"):
                 self._rotate_cube("counterclockwise" if "'" in move else "clockwise")
 
     def _bring_face_down(self, face: str):
@@ -100,11 +100,11 @@ class CubeManipulator:
         if face == "U":
             moves *= 2
         elif face == "F":
-            moves = "B2" + moves
+            moves = "V2" + moves
         elif face == "R":
-            moves = "B'" + moves
+            moves = "V'" + moves
         elif face == "L":
-            moves = "B" + moves
+            moves = "V" + moves
         self._apply_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
