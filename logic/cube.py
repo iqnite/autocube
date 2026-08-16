@@ -215,8 +215,8 @@ class Algorithm:
                 moves = (
                     moves.replace(f"{move_str} " * 4, " ")
                     .replace(f"{move_str} " * 3, f"{move_str}' ")
-                    .replace(f"{move} {move}' ", " ")
-                    .replace(f"{move}' {move} ", " ")
+                    .replace(f"{move_str} {move_str}' ", " ")
+                    .replace(f"{move_str}' {move_str} ", " ")
                     .replace(f"{move_str} " * 2, f"{move_str}2 ")
                     .replace("'2", "2")
                     .replace("2'", "2")
