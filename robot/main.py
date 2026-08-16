@@ -65,7 +65,8 @@ class Robot:
                 if cmd_type == "s":
                     sensor_id = args[0]
                     if sensor_id == "rgb":
-                        output.append(str(self.color_sensor.rgb()))
+                        r, g, b = self.color_sensor.rgb()
+                        output.append(str(r) + "," + str(g) + "," + str(b))
                         continue
             except Exception as e:
                 output.append("ERROR: " + str(e))

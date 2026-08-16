@@ -53,6 +53,11 @@ class Robot:
         if "ERROR" in response:
             print(f"Error executing command: {response}")
 
+    def get_color(self) -> tuple[float, float, float]:
+        response = self.execute("s rgb")
+        r, g, b = map(float, response.split(","))
+        return r, g, b
+
 
 class CubeManipulator:
     def __init__(self):
