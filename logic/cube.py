@@ -234,6 +234,7 @@ class Algorithm:
         previous_move = None
         count = 1
         for move in self.moves + [""]:
+            move = move.strip().replace("S", "A").replace("T", "A")
             if move == previous_move:
                 count += 1
             else:
