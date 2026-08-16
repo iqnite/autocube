@@ -6,7 +6,6 @@ import socket
 import time
 from typing import Literal
 
-from controller.mappings import FACE_RELOCATION_MOVES
 from logic.cube import Algorithm
 
 
@@ -97,10 +96,18 @@ class CubeManipulator:
                 self._rotate_cube("counterclockwise" if "'" in move else "clockwise")
 
     def _bring_face_down(self, face: str):
-        self.apply_motor_algorithm(Algorithm(FACE_RELOCATION_MOVES[face]))
-        if face in ("D", "B"):
+        if face == "D":
             return
-        return self._bring_face_down("B")
+        moves = " S T A A' A' S' "
+        if face == "U":
+            moves *= 2
+        elif face == "F":
+            moves = "B2" + moves
+        elif face == "R":
+            moves = "B" + moves
+        elif face == "L":
+            moves = "B'" + moves
+        self.apply_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
         self.face_locations.update(
