@@ -18,7 +18,6 @@
       "request": "launch",
       "program": "${workspaceFolder}/autocube_controller.py",
       "console": "integratedTerminal",
-      "args": "${command:pickArgs}"
     },
     {
       "name": "robot",

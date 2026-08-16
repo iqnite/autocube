@@ -65,17 +65,24 @@ if __name__ == "__main__":
         s.listen(1)
 
         print("Listening for connection on port", PORT)
-        conn, addr = s.accept()
-        try:
-            print("Connected by laptop at", addr)
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break  # Laptop disconnected
-                command = data.decode("utf-8").strip()
-                response = robot.execute_command(command)
-                conn.send(response.encode("utf-8") if response else b"OK")
-        finally:
-            conn.close()
+        while True:
+            conn, addr = s.accept()
+            try:
+                print("Connected by laptop at", addr)
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break  # Laptop disconnected
+                    command = data.decode("utf-8").strip()
+                    response = robot.execute_command(command)
+                    conn.send(response.encode("utf-8") if response else b"OK")
+            finally:
+                try:
+                    conn.close()
+                except OSError as e:
+                    print("Error occurred while closing connection:", e)
     finally:
-        s.close()
+        try:
+            s.close()
+        except OSError as e:
+            print("Error occurred while closing socket:", e)
