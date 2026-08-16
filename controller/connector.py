@@ -6,6 +6,7 @@ import socket
 import time
 from typing import Literal
 
+from controller import mappings
 from logic.cube import Algorithm
 
 
@@ -110,34 +111,12 @@ class CubeManipulator:
         self.apply_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
-        self.face_locations.update(
-            {
-                "U": self.face_locations["B"],
-                "F": self.face_locations["U"],
-                "D": self.face_locations["F"],
-                "B": self.face_locations["D"],
-            }
-        )
+        for face, current_pos in self.face_locations.items():
+            self.face_locations[face] = mappings.TILT_MAP[current_pos]
 
     def _rotate_cube(self, direction: Literal["clockwise", "counterclockwise"]):
-        if direction == "clockwise":
-            self.face_locations.update(
-                {
-                    "F": self.face_locations["R"],
-                    "R": self.face_locations["B"],
-                    "B": self.face_locations["L"],
-                    "L": self.face_locations["F"],
-                }
-            )
-        elif direction == "counterclockwise":
-            self.face_locations.update(
-                {
-                    "F": self.face_locations["L"],
-                    "L": self.face_locations["B"],
-                    "B": self.face_locations["R"],
-                    "R": self.face_locations["F"],
-                }
-            )
+        for face, current_pos in self.face_locations.items():
+            self.face_locations[face] = mappings.ROTATION_MAP[direction][current_pos]
 
     def _lock_cube(self):
         self.apply_motor_algorithm(Algorithm("S"))
