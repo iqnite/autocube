@@ -47,7 +47,9 @@ class Robot:
         commands = []
         merged_moves = algorithm.merge_repeated_moves()
         for move in merged_moves:
-            parsed_move = move.lower().replace("t", "a").replace("s", "a")
+            parsed_move = (
+                move.lower().replace("t", "a").replace("s", "a").replace("v", "b")
+            )
             commands.append(f"m {parsed_move}")
         response = self.execute(";".join(commands))
         if "ERROR" in response:
