@@ -3,10 +3,11 @@ Contains classes for interfacing the EV3 robot and manipulating the cube via the
 """
 
 import socket
+import time
 from typing import Literal
 
 from controller.mappings import FACE_RELOCATION_MOVES
-from logic.cube import Algorithm, Cube
+from logic.cube import Algorithm
 
 
 class Robot:
@@ -15,10 +16,20 @@ class Robot:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self):
-        print(f"Connecting to EV3 at {self.host}:{self.port}...")
-        self.socket.connect((self.host, self.port))
-        print("Connected successfully!\n")
+    def connect(self, retry: bool = True):
+        print(f"Connecting to EV3 at {self.host}:{self.port}...", end="")
+        while True:
+            try:
+                self.socket.connect((self.host, self.port))
+            except ConnectionRefusedError:
+                if retry:
+                    print(".", end="")
+                    time.sleep(3)
+                    continue
+                raise
+            else:
+                break
+        print("\nConnected successfully!\n")
 
     def __enter__(self):
         self.socket.__enter__()
