@@ -42,9 +42,9 @@ class Robot:
                 if cmd_type == "m":
                     motor_id = args[0][0]
                     is_prime = "'" in args[0]
-                    speed_modifier = -1 if is_prime else 1
-                    speed = 1000 * speed_modifier
-                    angle = 90
+                    modifier = -1 if is_prime else 1
+                    speed = 1000
+                    angle = 90 * modifier
                     if motor_id == "b":
                         angle *= 3
                     self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
