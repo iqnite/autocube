@@ -159,6 +159,9 @@ class CubeScanner:
         cube_state = {}
         if not self.calibration:
             self.calibrate()
+        self.cube_manipulator.bring_face_down("D")
+        self.cube_manipulator.bring_face_front("F")
+        self.robot.apply_manipulations(self.cube_manipulator)
         for face in mappings.FACE_SCAN_ORDER:
             face_colors = [face]
             for i in range(8):

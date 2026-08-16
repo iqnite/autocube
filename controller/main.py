@@ -4,8 +4,9 @@ Main entry point for the robot controller.
 
 import sys
 
-from controller.connector import CubeManipulator, Robot
+from controller.connector import CubeManipulator, CubeScanner, Robot
 from logic.cube import Algorithm
+from script.visualizer import visualize_cube
 
 PORT = 65432
 
@@ -16,13 +17,18 @@ def main():
     with Robot(ev3_ip, PORT) as robot:
         robot.connect()
         while True:
-            user_input = input("Enter algorithm (or 'quit' or 'reset'): ")
+            user_input = input("Enter algorithm, 'scan', 'quit' or 'reset': ")
             if not user_input:
                 continue
             if user_input == "quit":
                 break
             if user_input == "reset":
                 manipulator = CubeManipulator()
+                continue
+            if user_input == "scan":
+                scanner = CubeScanner(robot, manipulator)
+                cube = scanner.scan()
+                visualize_cube(cube)
                 continue
             robot.apply_motor_algorithm(
                 manipulator.cube_to_motor_algorithm(Algorithm(user_input))
