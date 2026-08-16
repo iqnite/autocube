@@ -43,23 +43,17 @@ class Robot:
         response = self.socket.recv(1024)
         return response.decode("utf-8")
 
-    def apply_motor_algorithm(self, algorithm: Algorithm, on_move=None):
+    def apply_motor_algorithm(self, algorithm: Algorithm):
+        commands = []
         for move in algorithm.moves:
             motor_id = move[0].lower()
+            prime_modifier = "'" if "'" in move else ""
             if motor_id in ("t", "s"):
                 motor_id = "a"
-            speed_modifier = 1 if "'" not in move else -1
-            speed = 1000 * speed_modifier
-            angle = 90
-            if motor_id == "b":
-                angle *= 3
-            command = f"m {motor_id} {speed} {angle}"
-            response = self.execute(command)
-            if response.startswith("ERROR"):
-                print(f"Error executing command '{command}': {response}")
-                break
-            if on_move is not None:
-                on_move()
+            commands.append(f"m {motor_id}{prime_modifier}")
+        response = self.execute(";".join(commands))
+        if "ERROR" in response:
+            print(f"Error executing command: {response}")
 
 
 class CubeManipulator:

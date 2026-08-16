@@ -31,24 +31,40 @@ class Robot:
         self.motors["a"].run_until_stalled(-100)
         self.motors["c"].run_until_stalled(500)
 
-    def execute_command(self, command):
-        print(command)
-        try:
-            cmd_type, *args = command.split()
-            if cmd_type == "m":
-                motor_id, speed, angle = args
-                self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
-                return
-            if cmd_type == "t":
-                motor_id, speed, angle = args
-                self.motors[motor_id].run_target(int(speed), int(angle), wait=True)
-                return
-            if cmd_type == "s":
-                sensor_id = args[0]
-                if sensor_id == "rgb":
-                    return str(self.color_sensor.rgb())
-        except Exception as e:
-            return "ERROR: " + str(e)
+    def execute_command(self, commands):
+        print(commands)
+        output = []
+        for command in commands.split(";"):
+            try:
+                if not command.strip():
+                    continue
+                cmd_type, *args = command.split()
+                if cmd_type == "m":
+                    motor_id = args[0][0]
+                    is_prime = "'" in args[0]
+                    speed_modifier = -1 if is_prime else 1
+                    speed = 1000 * speed_modifier
+                    angle = 90
+                    if motor_id == "b":
+                        angle *= 3
+                    self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
+                    continue
+                if cmd_type == "a":
+                    motor_id, speed, angle = args
+                    self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
+                    continue
+                if cmd_type == "t":
+                    motor_id, speed, angle = args
+                    self.motors[motor_id].run_target(int(speed), int(angle), wait=True)
+                    continue
+                if cmd_type == "s":
+                    sensor_id = args[0]
+                    if sensor_id == "rgb":
+                        output.append(str(self.color_sensor.rgb()))
+                        continue
+            except Exception as e:
+                output.append("ERROR: " + str(e))
+        return ";".join(output)
 
 
 if __name__ == "__main__":
@@ -67,7 +83,7 @@ if __name__ == "__main__":
             try:
                 print("Connected by laptop at", addr)
                 while True:
-                    data = conn.recv(1024)
+                    data = conn.recv(2048)
                     if not data:
                         break  # Laptop disconnected
                     command = data.decode("utf-8").strip()
