@@ -75,12 +75,12 @@ class CubeManipulator:
             target_face = self.face_locations[face]
             modifier = "" if "'" in move else "'"
             self._bring_face_down(target_face)
-            self._lock_cube()
-            self.apply_motor_algorithm(Algorithm(f"B{modifier}"))
-            self._unlock_cube()
+            self._move_history.append("S")
+            self._move_history.append(f"B{modifier}")
+            self._move_history.append("S'")
         return Algorithm(self._move_history).optimize()
 
-    def apply_motor_algorithm(self, algorithm: Algorithm):
+    def _apply_motor_algorithm(self, algorithm: Algorithm):
         for move in algorithm.moves:
             self._move_history.append(move)
             if move == "T":
@@ -100,7 +100,7 @@ class CubeManipulator:
             moves = "B'" + moves
         elif face == "L":
             moves = "B" + moves
-        self.apply_motor_algorithm(Algorithm(moves))
+        self._apply_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
         for face, current_pos in self.face_locations.items():
@@ -109,9 +109,3 @@ class CubeManipulator:
     def _rotate_cube(self, direction: Literal["clockwise", "counterclockwise"]):
         for face, current_pos in self.face_locations.items():
             self.face_locations[face] = mappings.ROTATION_MAP[direction][current_pos]
-
-    def _lock_cube(self):
-        self.apply_motor_algorithm(Algorithm("S"))
-
-    def _unlock_cube(self):
-        self.apply_motor_algorithm(Algorithm("S'"))
