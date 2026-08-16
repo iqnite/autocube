@@ -2,12 +2,14 @@
 Contains classes for interfacing the EV3 robot and manipulating the cube via the motors.
 """
 
+import math
 import socket
 import time
 from typing import Literal
 
 from controller import mappings
-from logic.cube import Algorithm
+from logic import mappings as logic_mappings
+from logic.cube import Algorithm, Cube
 
 
 class Robot:
@@ -55,8 +57,12 @@ class Robot:
         if "ERROR" in response:
             print(f"Error executing command: {response}")
 
-    def get_color(self) -> tuple[float, float, float]:
-        response = self.execute("s rgb")
+    def scan_color(self, position: int | None = None) -> tuple[float, float, float]:
+        command = "s rgb"
+        if position is not None:
+            angle = position  # TODO: Adjust
+            command = f"t c 400 {angle};" + command
+        response = self.execute(command)
         r, g, b = map(float, response.split(","))
         return r, g, b
 
@@ -81,7 +87,7 @@ class CubeManipulator:
                 raise ValueError(f"Invalid face '{face}' in algorithm.")
             target_face = self.face_locations[face]
             modifier = "" if "'" in move else "'"
-            self._bring_face_down(target_face)
+            self.bring_face_down(target_face)
             self._move_history.append("S")
             self._move_history.append(f"V{modifier}")
             self._move_history.append("S'")
@@ -95,7 +101,7 @@ class CubeManipulator:
             elif move in ("V", "V'"):
                 self._rotate_cube("counterclockwise" if "'" in move else "clockwise")
 
-    def _bring_face_down(self, face: str):
+    def bring_face_down(self, face: str):
         if face == "D":
             return
         moves = " S T A A' A' S' "
@@ -116,3 +122,41 @@ class CubeManipulator:
     def _rotate_cube(self, direction: Literal["clockwise", "counterclockwise"]):
         for face, current_pos in self.face_locations.items():
             self.face_locations[face] = mappings.ROTATION_MAP[direction][current_pos]
+
+
+class CubeScanner:
+    def __init__(
+        self,
+        robot: Robot,
+        cube_manipulator: CubeManipulator,
+        calibration: dict[str, tuple[float, float, float]] | None = None,
+    ):
+        self.robot = robot
+        self.cube_manipulator = cube_manipulator
+        self.calibration = calibration
+
+    def calibrate(self):
+        faces = "U", "F", "D", "B", "L", "R"
+        self.calibration = {face: self.scan_face_position(face, 3) for face in faces}
+
+    def scan_face_position(
+        self, face: str, position: int
+    ) -> tuple[float, float, float]:
+        self.cube_manipulator.bring_face_down(logic_mappings.OPPOSITE_FACES[face])
+        return self.robot.scan_color(position)
+
+    def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
+        if not self.calibration:
+            raise ValueError("Calibration data is not available.")
+        closest_color = None
+        min_distance = float("inf")
+        for name, (r2, g2, b2) in self.calibration.items():
+            distance = math.sqrt((r - r2) ** 2 + (g - g2) ** 2 + (b - b2) ** 2)
+            if distance < min_distance:
+                min_distance = distance
+                closest_color = name
+        if closest_color is None:
+            raise ValueError(
+                "No closest color found. Calibration data may be incomplete."
+            )
+        return closest_color
