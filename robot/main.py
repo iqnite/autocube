@@ -47,10 +47,11 @@ class Robot:
                     repetitions_str = args[0][-1]
                     if repetitions_str.isdigit():
                         repetitions = int(repetitions_str)
-                    speed = 1000
+                    speed = 400
                     angle = 90 * modifier * repetitions
                     if motor_id == "b":
                         angle *= 3
+                        speed = 1000
                     self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
                     continue
                 if cmd_type == "a":
