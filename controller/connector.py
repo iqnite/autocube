@@ -73,7 +73,7 @@ class CubeManipulator:
             if face not in self.face_locations:
                 raise ValueError(f"Invalid face '{face}' in algorithm.")
             target_face = self.face_locations[face]
-            modifier = "'" if "'" in move else ""
+            modifier = "" if "'" in move else "'"
             self._bring_face_down(target_face)
             self._lock_cube()
             self.apply_motor_algorithm(Algorithm(f"B{modifier}"))
