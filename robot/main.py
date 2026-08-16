@@ -43,8 +43,12 @@ class Robot:
                     motor_id = args[0][0]
                     is_prime = "'" in args[0]
                     modifier = -1 if is_prime else 1
+                    repetitions = 1
+                    repetitions_str = args[0][-1]
+                    if repetitions_str.isdigit():
+                        repetitions = int(repetitions_str)
                     speed = 1000
-                    angle = 90 * modifier
+                    angle = 90 * modifier * repetitions
                     if motor_id == "b":
                         angle *= 3
                     self.motors[motor_id].run_angle(int(speed), int(angle), wait=True)
@@ -89,13 +93,11 @@ if __name__ == "__main__":
                     command = data.decode("utf-8").strip()
                     response = robot.execute_command(command)
                     conn.send(response.encode("utf-8") if response else b"OK")
+            except Exception as e:
+                print("Error during communication:", e)
             finally:
-                try:
-                    conn.close()
-                except OSError as e:
-                    print("Error occurred while closing connection:", e)
+                conn.close()
+    except Exception as e:
+        print("Error setting up server:", e)
     finally:
-        try:
-            s.close()
-        except OSError as e:
-            print("Error occurred while closing socket:", e)
+        s.close()

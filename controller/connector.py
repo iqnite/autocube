@@ -45,12 +45,10 @@ class Robot:
 
     def apply_motor_algorithm(self, algorithm: Algorithm):
         commands = []
-        for move in algorithm.moves:
-            motor_id = move[0].lower()
-            prime_modifier = "'" if "'" in move else ""
-            if motor_id in ("t", "s"):
-                motor_id = "a"
-            commands.append(f"m {motor_id}{prime_modifier}")
+        merged_moves = algorithm.merge_repeated_moves()
+        for move in merged_moves:
+            parsed_move = move.lower().replace("t", "a").replace("s", "a")
+            commands.append(f"m {parsed_move}")
         response = self.execute(";".join(commands))
         if "ERROR" in response:
             print(f"Error executing command: {response}")

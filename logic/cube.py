@@ -229,6 +229,23 @@ class Algorithm:
             previous_length = len(moves)
         return moves
 
+    def merge_repeated_moves(self) -> list[str]:
+        new_moves = []
+        previous_move = None
+        count = 1
+        for move in self.moves + [""]:
+            if move == previous_move:
+                count += 1
+            else:
+                if previous_move is not None:
+                    if count > 1:
+                        new_moves.append(f"{previous_move}{count}")
+                    else:
+                        new_moves.append(previous_move)
+                previous_move = move
+                count = 1
+        return new_moves
+
     class CubeRotation(Enum):
         U = "U"
         U_PRIME = "U'"
