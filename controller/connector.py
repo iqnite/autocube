@@ -97,9 +97,9 @@ class CubeManipulator:
         elif face == "F":
             moves = "B2" + moves
         elif face == "R":
-            moves = "B" + moves
-        elif face == "L":
             moves = "B'" + moves
+        elif face == "L":
+            moves = "B" + moves
         self.apply_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
