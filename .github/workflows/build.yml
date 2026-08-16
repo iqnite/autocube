@@ -28,7 +28,7 @@ jobs:
       - name: Build with PyInstaller
         working-directory: ${{ github.workspace }}
         run: |
-          pyinstaller --windowed --name=autocube script/main.py
+          pyinstaller --windowed --name=autocube autocube_script.py
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
