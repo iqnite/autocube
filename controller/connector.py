@@ -37,9 +37,9 @@ class Robot:
             motor_id = move[0].lower()
             if motor_id in ("t", "s"):
                 motor_id = "a"
-            modifier = 1 if "'" not in move else -1
-            speed = 1000 * modifier
-            angle = 90 * modifier
+            speed_modifier = 1 if "'" not in move else -1
+            speed = 1000 * speed_modifier
+            angle = 90
             if motor_id == "b":
                 angle *= 3
             command = f"m {motor_id} {speed} {angle}"
@@ -94,10 +94,10 @@ class CubeManipulator:
     def _tilt_cube(self):
         self.face_locations.update(
             {
-                "U": self.face_locations["F"],
-                "F": self.face_locations["D"],
-                "D": self.face_locations["B"],
-                "B": self.face_locations["U"],
+                "U": self.face_locations["B"],
+                "F": self.face_locations["U"],
+                "D": self.face_locations["F"],
+                "B": self.face_locations["D"],
             }
         )
 
@@ -105,19 +105,19 @@ class CubeManipulator:
         if direction == "clockwise":
             self.face_locations.update(
                 {
-                    "F": self.face_locations["L"],
-                    "L": self.face_locations["B"],
-                    "B": self.face_locations["R"],
-                    "R": self.face_locations["F"],
+                    "F": self.face_locations["R"],
+                    "R": self.face_locations["B"],
+                    "B": self.face_locations["L"],
+                    "L": self.face_locations["F"],
                 }
             )
         elif direction == "counterclockwise":
             self.face_locations.update(
                 {
-                    "F": self.face_locations["R"],
-                    "R": self.face_locations["B"],
-                    "B": self.face_locations["L"],
-                    "L": self.face_locations["F"],
+                    "F": self.face_locations["L"],
+                    "L": self.face_locations["B"],
+                    "B": self.face_locations["R"],
+                    "R": self.face_locations["F"],
                 }
             )
 
