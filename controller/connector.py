@@ -135,14 +135,41 @@ class CubeScanner:
         self.cube_manipulator = cube_manipulator
         self.calibration = calibration
 
+    def scan(self) -> Cube:
+        cube_state = {}
+        if not self.calibration:
+            self.calibrate()
+        for face in mappings.FACE_SCAN_ORDER:
+            face_colors = [face]
+            for i in range(8):
+                if i % 2 == 0:
+                    position = 2
+                else:
+                    position = 1
+                r, g, b = self.scan_face_position(face, position)
+                calibrated_color = self._get_closest_calibrated_color(r, g, b)
+                face_colors.append(calibrated_color)
+                self.robot.execute(f"a b 1000 {-135}")
+            for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
+                if face in faces:
+                    for row in position_map:
+                        for col, color_index in enumerate(row):
+                            cube_state[face][row][col] = face_colors[color_index]
+                    break
+            else:
+                raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
+            self.robot.scan_color(0)
+        return Cube(cube_state)
+
     def calibrate(self):
-        faces = "U", "F", "D", "B", "L", "R"
+        faces = mappings.FACE_SCAN_ORDER
         self.calibration = {face: self.scan_face_position(face, 3) for face in faces}
 
     def scan_face_position(
         self, face: str, position: int
     ) -> tuple[float, float, float]:
         self.cube_manipulator.bring_face_down(logic_mappings.OPPOSITE_FACES[face])
+        self.robot.apply_motor_algorithm(Algorithm(self.cube_manipulator._move_history))
         return self.robot.scan_color(position)
 
     def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
