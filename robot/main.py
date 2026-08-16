@@ -21,18 +21,15 @@ class Robot:
     def __init__(self):
         self.ev3 = EV3Brick()
         self.color_sensor = ColorSensor(Port.S2)
-        self.motor_yaw = Motor(Port.A)
-        self.motor_roll = Motor(Port.B)
-        self.motor_scanner = Motor(Port.C)
         self.motors = {
-            "a": self.motor_yaw,
-            "b": self.motor_roll,
-            "c": self.motor_scanner,
+            "a": Motor(Port.A),
+            "b": Motor(Port.B),
+            "c": Motor(Port.C),
         }
 
     def reset_motor_positions(self):
-        self.motor_yaw.run_until_stalled(-100)
-        self.motor_scanner.run_until_stalled(500)
+        self.motors["a"].run_until_stalled(-100)
+        self.motors["c"].run_until_stalled(500)
 
     def execute_command(self, command):
         print(command)
