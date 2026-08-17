@@ -191,7 +191,9 @@ class CubeScanner:
                     position = 2
                 else:
                     position = 1
-                r, g, b = self.scan_face_position(face, position)
+                r, g, b = self.scan_face_position(
+                    face, position, reset_position=(i == 7)
+                )
                 calibrated_color = self._get_closest_calibrated_color(r, g, b)
                 face_colors.append(calibrated_color)
                 self.robot.queue("a b 1000 -135")
@@ -211,19 +213,22 @@ class CubeScanner:
 
     def calibrate(self):
         faces = mappings.FACE_SCAN_ORDER
-        self.calibration = {face: self.scan_face_position(face, 3) for face in faces}
+        self.calibration = {
+            face: self.scan_face_position(face, 3, reset_position=True)
+            for face in faces
+        }
         self.cube_manipulator.bring_face_down("D", is_logical=True)
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
 
     def scan_face_position(
-        self, face: str, position: int
+        self, face: str, position: int, reset_position: bool = False
     ) -> tuple[float, float, float]:
         self.cube_manipulator.bring_face_down(
             logic_mappings.OPPOSITE_FACES[face], is_logical=True
         )
         self.robot.apply_manipulations(self.cube_manipulator)
-        return self.robot.scan_color(position, reset_position=True)
+        return self.robot.scan_color(position, reset_position=reset_position)
 
     def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
         if not self.calibration:

@@ -38,8 +38,6 @@ class Robot:
                 if not angle.isdigit():
                     continue
                 self.motors[motor_id].reset_angle(int(angle))
-                motor_positions_file.seek(0)
-                motor_positions_file.truncate()
         finally:
             if motor_positions_file is not None:
                 motor_positions_file.close()
@@ -50,7 +48,9 @@ class Robot:
         try:
             motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
             for motor_id, motor in self.motors.items():
-                motor_positions_file.write(motor_id + ":" + str(motor.angle() % 360) + "\n")
+                motor_positions_file.write(
+                    motor_id + ":" + str(motor.angle() % 360) + "\n"
+                )
         finally:
             if motor_positions_file is not None:
                 motor_positions_file.flush()
@@ -59,6 +59,7 @@ class Robot:
     def reset_motor_positions(self):
         for motor in self.motors.values():
             motor.run_target(500, 0)
+        self.save_motor_positions()
 
     def execute_command(self, commands):
         print(commands)
