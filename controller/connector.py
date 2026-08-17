@@ -172,37 +172,43 @@ class CubeScanner:
         self,
         robot: Robot,
         cube_manipulator: CubeManipulator,
-        calibration: dict[str, tuple[float, float, float]] | None = None,
     ):
         self.robot = robot
         self.cube_manipulator = cube_manipulator
-        self.calibration = calibration
+        self.calibration = None
 
     def scan(self) -> Cube:
         cube = Cube()
-        if not self.calibration:
-            self.calibrate()
+        self.calibration = {}
         self.cube_manipulator.bring_face_down("D", is_logical=True)
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
         for face in mappings.FACE_SCAN_ORDER:
-            face_colors = [face]
-            for i in range(8):
-                if i % 2 == 0:
-                    position = 2
-                else:
+            face_colors = []
+            for i in range(9):
+                if i == 0:
+                    # Center
+                    position = 3
+                elif i % 2 == 0:
+                    # Corner
                     position = 1
-                r, g, b = self.scan_face_position(
-                    face, position, reset_position=(i == 7)
-                )
-                calibrated_color = self._get_closest_calibrated_color(r, g, b)
-                face_colors.append(calibrated_color)
+                else:
+                    # Edge
+                    position = 2
+                color = self.scan_face_position(face, position, reset_position=(i == 8))
+                face_colors.append(color)
+                if i == 0:
+                    self.calibration[face] = color
                 self.robot.queue("a b 1000 -135")
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
                     for row, row_data in enumerate(position_map):
                         for col, color_index in enumerate(row_data):
-                            cube.state[face][row][col] = face_colors[color_index]
+                            cube.state[face][row][col] = (
+                                self.get_closest_calibrated_color(
+                                    *face_colors[color_index]
+                                )
+                            )
                     break
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
@@ -211,16 +217,6 @@ class CubeScanner:
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
         return cube
-
-    def calibrate(self):
-        faces = mappings.FACE_SCAN_ORDER
-        self.calibration = {
-            face: self.scan_face_position(face, 3, reset_position=True)
-            for face in faces
-        }
-        self.cube_manipulator.bring_face_down("D", is_logical=True)
-        self.cube_manipulator.bring_face_front("F", is_logical=True)
-        self.robot.apply_manipulations(self.cube_manipulator)
 
     def scan_face_position(
         self, face: str, position: int, reset_position: bool = False
@@ -231,7 +227,7 @@ class CubeScanner:
         self.robot.apply_manipulations(self.cube_manipulator)
         return self.robot.scan_color(position, reset_position=reset_position)
 
-    def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
+    def get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
         if not self.calibration:
             raise ValueError("Calibration data is not available.")
         closest_color = None
