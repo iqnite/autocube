@@ -29,7 +29,7 @@ class Robot:
         }
         motor_positions_file = None
         try:
-            motor_positions_file = open(MOTOR_POSITIONS_PATH, "r")
+            motor_positions_file = open(MOTOR_POSITIONS_PATH, "r+")
         except:
             motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
         else:
@@ -38,6 +38,8 @@ class Robot:
                 if not angle.isdigit():
                     continue
                 self.motors[motor_id].reset_angle(int(angle))
+                motor_positions_file.seek(0)
+                motor_positions_file.truncate()
         finally:
             if motor_positions_file is not None:
                 motor_positions_file.close()
