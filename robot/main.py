@@ -107,6 +107,7 @@ class Robot:
                         continue
             except Exception as e:
                 output.append("ERROR: " + str(e))
+        self.save_motor_positions()
         return ";".join(output)
 
 
@@ -131,7 +132,6 @@ if __name__ == "__main__":
                         break  # Laptop disconnected
                     command = data.decode("utf-8").strip()
                     response = robot.execute_command(command)
-                    robot.save_motor_positions()
                     conn.send(response.encode("utf-8") if response else b"OK")
             except Exception as e:
                 print("Error during communication:", e)
