@@ -17,6 +17,7 @@ class Robot:
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._command_queue = []
 
     def connect(self, retry: bool = True):
         print(f"Connecting to EV3 at {self.host}:{self.port}...", end="")
@@ -41,9 +42,14 @@ class Robot:
         self.socket.__exit__(exc_type, exc_val, exc_tb)
 
     def execute(self, command: str) -> str:
-        self.socket.sendall(command.encode("utf-8"))
+        self.queue(command)
+        self.socket.sendall(";".join(self._command_queue).encode("utf-8"))
+        self._command_queue.clear()
         response = self.socket.recv(1024)
         return response.decode("utf-8")
+
+    def queue(self, command: str):
+        self._command_queue.append(command)
 
     def apply_manipulations(self, manipulator: "CubeManipulator"):
         if manipulator._moves_to_apply:
@@ -172,7 +178,7 @@ class CubeScanner:
                 r, g, b = self.scan_face_position(face, position)
                 calibrated_color = self._get_closest_calibrated_color(r, g, b)
                 face_colors.append(calibrated_color)
-                self.robot.execute(f"a b 1000 {-135}")
+                self.robot.queue(f"a b 1000 {-135}")
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
                     for row in position_map:
