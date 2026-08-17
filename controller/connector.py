@@ -152,9 +152,9 @@ class CubeManipulator:
         elif face == "B":
             moves = "V2"
         elif face == "R":
-            moves = "V'"
-        else:  # face == "L"
             moves = "V"
+        else:  # face == "L"
+            moves = "V'"
         self._stage_motor_algorithm(Algorithm(moves))
 
     def _tilt_cube(self):
