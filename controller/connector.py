@@ -2,6 +2,7 @@
 Contains classes for interfacing the EV3 robot and manipulating the cube via the motors.
 """
 
+import colorsys
 import math
 import socket
 import time
@@ -231,10 +232,15 @@ class CubeScanner:
     def get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
         if not self.calibration:
             raise ValueError("Calibration data is not available.")
+        h, s, v = colorsys.rgb_to_hsv(r / 100.0, g / 100.0, b / 100.0)
         closest_color = None
-        min_distance = float("inf")
+        min_distance = math.inf
         for name, (r2, g2, b2) in self.calibration.items():
-            distance = math.sqrt((r - r2) ** 2 + (g - g2) ** 2 + (b - b2) ** 2)
+            h2, s2, v2 = colorsys.rgb_to_hsv(r2 / 100.0, g2 / 100.0, b2 / 100.0)
+            dh = min(abs(h - h2), 1.0 - abs(h - h2))
+            ds = abs(s - s2)
+            dv = abs(v - v2)
+            distance = math.sqrt((dh * 4) ** 2 + ds**2 + dv**2)
             if distance < min_distance:
                 min_distance = distance
                 closest_color = name
