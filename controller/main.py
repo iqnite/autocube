@@ -17,7 +17,7 @@ def main():
     with Robot(ev3_ip, PORT) as robot:
         robot.connect()
         while True:
-            user_input = input("Enter algorithm, 'scan', 'quit' or 'reset': ")
+            user_input = input("Enter algorithm, 'cmd', 'scan', 'quit' or 'reset': ")
             if not user_input:
                 continue
             if user_input == "quit":
@@ -29,6 +29,10 @@ def main():
                 scanner = CubeScanner(robot, manipulator)
                 cube = scanner.scan()
                 visualize_cube(cube)
+                continue
+            if user_input.startswith("cmd"):
+                command = user_input[4:]
+                robot.execute(command)
                 continue
             robot.apply_motor_algorithm(
                 manipulator.cube_to_motor_algorithm(Algorithm(user_input))
