@@ -199,7 +199,8 @@ class CubeScanner:
                 face_colors.append(color)
                 if i == 0:
                     self.calibration[face] = color
-                self.robot.queue("a b 1000 -135")
+                else:
+                    self.robot.queue("a b 1000 -135")
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
                     for row, row_data in enumerate(position_map):
