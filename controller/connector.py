@@ -77,11 +77,11 @@ class Robot:
             if position == 0:
                 angle = 0
             elif position == 1:
-                angle = -90
+                angle = -140
             elif position == 2:
                 angle = -180
             elif position == 3:
-                angle = -270
+                angle = -360
             else:
                 angle = position * -90
             command = f"t c 1000 {angle};" + command
