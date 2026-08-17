@@ -27,17 +27,22 @@ class Robot:
             "b": Motor(Port.B),
             "c": Motor(Port.C),
         }
+
         motor_positions_file = None
         try:
             motor_positions_file = open(MOTOR_POSITIONS_PATH, "r+")
-        except:
+        except OSError:
             motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
         else:
             for line in motor_positions_file.readlines():
-                motor_id, angle = line.strip().split(":")
-                if not angle.isdigit():
+                if ":" not in line:
                     continue
-                self.motors[motor_id].reset_angle(int(angle))
+                motor_id, angle_str = line.strip().split(":")
+                try:
+                    angle = int(angle_str)
+                    self.motors[motor_id].reset_angle(angle)
+                except ValueError:
+                    continue
         finally:
             if motor_positions_file is not None:
                 motor_positions_file.close()
@@ -48,9 +53,11 @@ class Robot:
         try:
             motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
             for motor_id, motor in self.motors.items():
-                motor_positions_file.write(
-                    motor_id + ":" + str(motor.angle() % 360) + "\n"
-                )
+                current_angle = motor.angle()
+                if motor_id == "b":
+                    current_angle = current_angle % 360
+                    motor.reset_angle(current_angle)
+                motor_positions_file.write(motor_id + ":" + str(current_angle) + "\n")
         finally:
             if motor_positions_file is not None:
                 motor_positions_file.flush()
