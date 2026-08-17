@@ -69,11 +69,24 @@ class Robot:
         if "ERROR" in response:
             print(f"Error executing command: {response}")
 
-    def scan_color(self, position: int | None = None) -> tuple[float, float, float]:
+    def scan_color(
+        self, position: int | None = None, reset_position: bool = False
+    ) -> tuple[float, float, float]:
         command = "s rgb"
         if position is not None:
-            angle = position  # TODO: Adjust
-            command = f"t c 400 {angle};" + command
+            if position == 0:
+                angle = 0
+            elif position == 1:
+                angle = -90
+            elif position == 2:
+                angle = -180
+            elif position == 3:
+                angle = -270
+            else:
+                angle = position * -90
+            command = f"t c 1000 {angle};" + command
+        if reset_position:
+            command += ";t c 1000 0"
         response = self.execute(command)
         r, g, b = map(float, response.split(","))
         return r, g, b
@@ -96,9 +109,8 @@ class CubeManipulator:
             face = move[0]
             if face not in self.face_locations:
                 raise ValueError(f"Invalid face '{face}' in algorithm.")
-            target_face = self.face_locations[face]
             modifier = "" if "'" in move else "'"
-            self.bring_face_down(target_face)
+            self.bring_face_down(face, is_logical=True)
             self._moves_to_apply.append("S")
             self._moves_to_apply.append(f"V{modifier}")
             self._moves_to_apply.append("S'")
@@ -112,7 +124,9 @@ class CubeManipulator:
             elif move in ("V", "V'"):
                 self._rotate_cube("counterclockwise" if "'" in move else "clockwise")
 
-    def bring_face_down(self, face: str):
+    def bring_face_down(self, face: str, is_logical: bool = True):
+        if is_logical:
+            face = self.face_locations[face]
         if face == "D":
             return
         moves = " S T A A' A' S' "
@@ -126,7 +140,9 @@ class CubeManipulator:
             moves = "V" + moves
         self._stage_motor_algorithm(Algorithm(moves))
 
-    def bring_face_front(self, face: str):
+    def bring_face_front(self, face: str, is_logical: bool = True):
+        if is_logical:
+            face = self.face_locations[face]
         if face == "F":
             return
         if face == "D":
@@ -162,11 +178,11 @@ class CubeScanner:
         self.calibration = calibration
 
     def scan(self) -> Cube:
-        cube_state = {}
+        cube = Cube()
         if not self.calibration:
             self.calibrate()
-        self.cube_manipulator.bring_face_down("D")
-        self.cube_manipulator.bring_face_front("F")
+        self.cube_manipulator.bring_face_down("D", is_logical=True)
+        self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
         for face in mappings.FACE_SCAN_ORDER:
             face_colors = [face]
@@ -181,31 +197,33 @@ class CubeScanner:
                 self.robot.queue("a b 1000 -135")
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
-                    for row in position_map:
-                        for col, color_index in enumerate(row):
-                            cube_state[face][row][col] = face_colors[color_index]
+                    for row, row_data in enumerate(position_map):
+                        for col, color_index in enumerate(row_data):
+                            cube.state[face][row][col] = face_colors[color_index]
                     break
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
             self.robot.scan_color(0)
-        self.cube_manipulator.bring_face_down("D")
-        self.cube_manipulator.bring_face_front("F")
+        self.cube_manipulator.bring_face_down("D", is_logical=True)
+        self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
-        return Cube(cube_state)
+        return cube
 
     def calibrate(self):
         faces = mappings.FACE_SCAN_ORDER
         self.calibration = {face: self.scan_face_position(face, 3) for face in faces}
-        self.cube_manipulator.bring_face_down("D")
-        self.cube_manipulator.bring_face_front("F")
+        self.cube_manipulator.bring_face_down("D", is_logical=True)
+        self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
 
     def scan_face_position(
         self, face: str, position: int
     ) -> tuple[float, float, float]:
-        self.cube_manipulator.bring_face_down(logic_mappings.OPPOSITE_FACES[face])
+        self.cube_manipulator.bring_face_down(
+            logic_mappings.OPPOSITE_FACES[face], is_logical=True
+        )
         self.robot.apply_manipulations(self.cube_manipulator)
-        return self.robot.scan_color(position)
+        return self.robot.scan_color(position, reset_position=True)
 
     def _get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
         if not self.calibration:
