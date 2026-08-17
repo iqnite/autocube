@@ -15,6 +15,7 @@ from pybricks.tools import DataLog, StopWatch, wait  # type: ignore
 
 HOST = "0.0.0.0"
 PORT = 65432
+MOTOR_POSITIONS_PATH = "motor_positions.txt"
 
 
 class Robot:
@@ -26,10 +27,36 @@ class Robot:
             "b": Motor(Port.B),
             "c": Motor(Port.C),
         }
+        motor_positions_file = None
+        try:
+            motor_positions_file = open(MOTOR_POSITIONS_PATH, "r")
+        except:
+            motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
+        else:
+            for line in motor_positions_file.readlines():
+                motor_id, angle = line.strip().split(":")
+                if not angle.isdigit():
+                    continue
+                self.motors[motor_id].reset_angle(int(angle))
+        finally:
+            if motor_positions_file is not None:
+                motor_positions_file.close()
+        self.reset_motor_positions()
+
+    def save_motor_positions(self):
+        motor_positions_file = None
+        try:
+            motor_positions_file = open(MOTOR_POSITIONS_PATH, "w")
+            for motor_id, motor in self.motors.items():
+                motor_positions_file.write(motor_id + ":" + str(motor.angle() % 360) + "\n")
+        finally:
+            if motor_positions_file is not None:
+                motor_positions_file.flush()
+                motor_positions_file.close()
 
     def reset_motor_positions(self):
-        self.motors["a"].run_until_stalled(-100)
-        self.motors["c"].run_until_stalled(500)
+        for motor in self.motors.values():
+            motor.run_target(500, 0)
 
     def execute_command(self, commands):
         print(commands)
@@ -94,6 +121,7 @@ if __name__ == "__main__":
                         break  # Laptop disconnected
                     command = data.decode("utf-8").strip()
                     response = robot.execute_command(command)
+                    robot.save_motor_positions()
                     conn.send(response.encode("utf-8") if response else b"OK")
             except Exception as e:
                 print("Error during communication:", e)
@@ -102,4 +130,5 @@ if __name__ == "__main__":
     except Exception as e:
         print("Error setting up server:", e)
     finally:
+        robot.save_motor_positions()
         s.close()
