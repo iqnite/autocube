@@ -32,7 +32,7 @@ def main():
                 continue
             if user_input.startswith("cmd"):
                 command = user_input[4:]
-                robot.execute(command)
+                print(robot.execute(command))
                 continue
             robot.apply_motor_algorithm(
                 manipulator.cube_to_motor_algorithm(Algorithm(user_input))
