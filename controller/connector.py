@@ -105,6 +105,7 @@ class CubeManipulator:
         self._moves_to_apply = []
 
     def cube_to_motor_algorithm(self, algorithm: Algorithm) -> Algorithm:
+        self._moves_to_apply.clear()
         for move in algorithm.moves:
             face = move[0]
             if face not in self.face_locations:
