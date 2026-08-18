@@ -176,16 +176,17 @@ class CubeScanner:
     ):
         self.robot = robot
         self.cube_manipulator = cube_manipulator
-        self.calibration = None
+        self.center_colors = None
 
     def scan(self) -> Cube:
         cube = Cube()
-        self.calibration = {}
+        self.center_colors = {}
+        face_colors = {}
         self.cube_manipulator.bring_face_down("D", is_logical=True)
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
         for face in mappings.FACE_SCAN_ORDER:
-            face_colors = []
+            face_colors[face] = []
             for i in range(9):
                 if i == 0:
                     # Center
@@ -197,24 +198,22 @@ class CubeScanner:
                     # Edge
                     position = 2
                 color = self.scan_face_position(face, position, reset_position=(i == 8))
-                face_colors.append(color)
+                face_colors[face].append(color)
                 if i == 0:
-                    self.calibration[face] = color
+                    self.center_colors[face] = color
                 else:
                     self.robot.queue("a b 1000 -135")
+        for face in mappings.FACE_SCAN_ORDER:
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
                     for row, row_data in enumerate(position_map):
                         for col, color_index in enumerate(row_data):
-                            cube.state[face][row][col] = (
-                                self.get_closest_calibrated_color(
-                                    *face_colors[color_index]
-                                )
+                            cube.state[face][row][col] = self.get_closest_center_color(
+                                *face_colors[color_index]
                             )
                     break
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
-            self.robot.scan_color(0)
         self.cube_manipulator.bring_face_down("D", is_logical=True)
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
@@ -229,13 +228,13 @@ class CubeScanner:
         self.robot.apply_manipulations(self.cube_manipulator)
         return self.robot.scan_color(position, reset_position=reset_position)
 
-    def get_closest_calibrated_color(self, r: float, g: float, b: float) -> str:
-        if not self.calibration:
+    def get_closest_center_color(self, r: float, g: float, b: float) -> str:
+        if not self.center_colors:
             raise ValueError("Calibration data is not available.")
         h, s, v = colorsys.rgb_to_hsv(r / 100.0, g / 100.0, b / 100.0)
         closest_color = None
         min_distance = math.inf
-        for name, (r2, g2, b2) in self.calibration.items():
+        for name, (r2, g2, b2) in self.center_colors.items():
             h2, s2, v2 = colorsys.rgb_to_hsv(r2 / 100.0, g2 / 100.0, b2 / 100.0)
             dh = min(abs(h - h2), 1.0 - abs(h - h2))
             ds = abs(s - s2)
