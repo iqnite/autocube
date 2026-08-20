@@ -13,7 +13,9 @@ from PySide6.QtWidgets import (
 )
 
 from controller.connector import CubeManipulator, CubeScanner, Robot
+from controller import mappings
 from logic.solver import solve_cube
+from script.visualizer import visualize_cube
 
 EV3_ADDRESS = "ev3dev.local"
 PORT = 65432
@@ -26,6 +28,7 @@ class CameraThread(QThread):
         super().__init__()
         self._is_running = True
         self.grid_size = 60
+        self.rectangle_color = mappings.FACE_BGRS["U"]
 
     def run(self):
         cap = cv2.VideoCapture(0)
@@ -39,7 +42,11 @@ class CameraThread(QThread):
                         x = cx + (col * self.grid_size)
                         y = cy + (row * self.grid_size)
                         cv2.rectangle(
-                            frame, (x - 5, y - 5), (x + 5, y + 5), (0, 255, 0), 2
+                            frame,
+                            (x - 5, y - 5),
+                            (x + 5, y + 5),
+                            self.rectangle_color,
+                            2,
                         )
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 bytes_per_line = 3 * w
@@ -53,14 +60,18 @@ class CameraThread(QThread):
         self._is_running = False
         self.wait()
 
+    @Slot("tuple[int, int, int]")
+    def set_guide_color(self, color: tuple[int, int, int]):
+        self.rectangle_color = color
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Autocube - Vision Scanner")
-        self.scan_order = ["U", "F", "D", "B", "L", "R"]
+        self.scan_order = mappings.FACE_SCAN_ORDER
         self.current_face = 0
-        self.scanned_data = {}
+        self.scanned_data: dict[str, list[list[tuple[float, float, float]]]] = {}
         self.motor_algorithm = None
         self.latest_frame = None
         self.video_label = QLabel("Starting camera...")
@@ -101,13 +112,14 @@ class MainWindow(QMainWindow):
             for col in [-1, 0, 1]:
                 x = cx + (col * grid_size)
                 y = cy + (row * grid_size)
-                r, g, b = self.latest_frame[y, x]
-                row_colors.append((int(r), int(g), int(b)))
+                r, g, b = map(int, self.latest_frame[y, x])
+                row_colors.append((r, g, b))
             face_colors.append(row_colors)
         self.scanned_data[face_name] = face_colors
         self.current_face += 1
         if self.current_face < len(self.scan_order):
             next_face = self.scan_order[self.current_face]
+            self.camera_thread.set_guide_color(mappings.FACE_BGRS[next_face])
             self.instruction_label.setText(
                 f"Align the {next_face} face and click Scan."
             )
@@ -121,8 +133,9 @@ class MainWindow(QMainWindow):
             )
             self.scan_btn.setEnabled(False)
             scanner = CubeScanner()
-            scanner.update_center_colors(self.scanned_data, center_index=1)
-            cube = scanner.colors_to_cube(self.scanned_data)
+            scanner.update_center_colors(self.scanned_data, (1, 1))
+            cube = scanner.rgb_to_cube(self.scanned_data)
+            visualize_cube(cube)
             solution = solve_cube(cube)
             manipulator = CubeManipulator()
             self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)

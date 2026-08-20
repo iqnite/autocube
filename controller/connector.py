@@ -6,7 +6,7 @@ import colorsys
 import math
 import socket
 import time
-from typing import Literal
+from typing import Literal, overload
 
 from controller import mappings
 from logic import mappings as logic_mappings
@@ -206,13 +206,13 @@ class CubeScanner:
                     self.center_colors[face] = color
                 else:
                     self.robot.queue("a b 1000 -135")
-        cube = self.colors_to_cube(face_colors)
+        cube = self.scan_to_cube(face_colors)
         self.cube_manipulator.bring_face_down("D", is_logical=True)
         self.cube_manipulator.bring_face_front("F", is_logical=True)
         self.robot.apply_manipulations(self.cube_manipulator)
         return cube
 
-    def colors_to_cube(
+    def scan_to_cube(
         self, face_colors: dict[str, list[tuple[float, float, float]]]
     ) -> Cube:
         cube = Cube()
@@ -227,6 +227,16 @@ class CubeScanner:
                     break
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
+        return cube
+
+    def rgb_to_cube(
+        self, face_colors: dict[str, list[list[tuple[float, float, float]]]]
+    ) -> Cube:
+        cube = Cube()
+        for face, face_data in face_colors.items():
+            for row, row_data in enumerate(face_data):
+                for col, color in enumerate(row_data):
+                    cube.state[face][row][col] = self.get_closest_center_color(*color)
         return cube
 
     def scan_face_position(
@@ -261,10 +271,33 @@ class CubeScanner:
             )
         return closest_color
 
+    @overload
     def update_center_colors(
-        self, colors: dict[str, tuple[float, float, float]], center_index: int
+        self,
+        colors: dict[str, list[tuple[float, float, float]]],
+        center_index: int,
+    ) -> None: ...
+
+    @overload
+    def update_center_colors(
+        self,
+        colors: dict[str, list[list[tuple[float, float, float]]]],
+        center_index: tuple[int, int],
+    ) -> None: ...
+
+    def update_center_colors(
+        self,
+        colors: (
+            dict[str, list[tuple[float, float, float]]]
+            | dict[str, list[list[tuple[float, float, float]]]]
+        ),
+        center_index: int | tuple[int, int],
     ):
         if not colors:
             raise ValueError("New center colors cannot be empty.")
+        if isinstance(center_index, tuple):
+            for face, facelets in colors.items():
+                self.center_colors[face] = facelets[center_index[0]][center_index[1]]
+            return
         for face, facelets in colors.items():
             self.center_colors[face] = facelets[center_index]
