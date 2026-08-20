@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from controller.connector import CubeManipulator, CubeScanner, Robot
 from controller import mappings
+from logic.autofix import autofix_scan
 from logic.solver import solve_cube
 from script.visualizer import visualize_cube
 
@@ -135,6 +136,9 @@ class MainWindow(QMainWindow):
             scanner = CubeScanner()
             scanner.update_center_colors(self.scanned_data, (1, 1))
             cube = scanner.rgb_to_cube(self.scanned_data)
+            cube.state = autofix_scan(cube.state)[0]
+            visualize_cube(cube)
+            return
             solution = solve_cube(cube)
             manipulator = CubeManipulator()
             self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
