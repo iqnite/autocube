@@ -1,71 +1,127 @@
-"""
-Main entry point for the robot controller.
-"""
-
 import sys
-import time
 
-from controller.connector import CubeManipulator, CubeScanner, Robot
-from logic import solver
-from logic.cube import Algorithm
-from script.visualizer import visualize_cube
+import cv2
+from PySide6.QtCore import Qt, QThread, Signal, Slot
+from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
+EV3_ADDRESS = "ev3dev.local"
 PORT = 65432
 
 
-def main():
-    ev3_ip = sys.argv[1] if len(sys.argv) > 1 else "ev3dev.local"
-    manipulator = CubeManipulator()
-    with Robot(ev3_ip, PORT) as robot:
-        robot.connect()
-        while True:
-            user_input = input("Enter algorithm or command: ")
-            if not user_input:
-                continue
-            if user_input == "quit":
-                break
-            if user_input == "reset":
-                manipulator = CubeManipulator()
-                continue
-            if user_input == "solve":
-                print("Scanning cube...")
-                cube = CubeScanner(robot, manipulator).scan()
-                print("Finding solution...")
-                solution = solver.solve_cube(cube)
-                print("Solving cube...")
-                robot.apply_motor_algorithm(
-                    manipulator.cube_to_motor_algorithm(Algorithm(solution))
+class CameraThread(QThread):
+    frame_ready = Signal(QImage, object)
+
+    def __init__(self):
+        super().__init__()
+        self._is_running = True
+        self.grid_size = 60
+
+    def run(self):
+        cap = cv2.VideoCapture(0)
+        while self._is_running:
+            ret, frame = cap.read()
+            if ret:
+                h, w = frame.shape[:2]
+                cx, cy = w // 2, h // 2
+                for row in [-1, 0, 1]:
+                    for col in [-1, 0, 1]:
+                        x = cx + (col * self.grid_size)
+                        y = cy + (row * self.grid_size)
+                        cv2.rectangle(
+                            frame, (x - 5, y - 5), (x + 5, y + 5), (0, 255, 0), 2
+                        )
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                bytes_per_line = 3 * w
+                qt_image = QImage(
+                    rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888
                 )
-                print("Cube solved!")
-                continue
-            if user_input.strip().startswith("scan"):
-                if "cont" in user_input:
-                    while True:
-                        try:
-                            print_color(robot.scan_color())
-                            time.sleep(0.5)
-                        except KeyboardInterrupt:
-                            break
-                    continue
-                else:
-                    scanner = CubeScanner(robot, manipulator)
-                    cube = scanner.scan()
-                    visualize_cube(cube)
-                    continue
-            if user_input.startswith("cmd"):
-                command = user_input[4:]
-                print(robot.execute(command))
-                continue
-            robot.apply_motor_algorithm(
-                manipulator.cube_to_motor_algorithm(Algorithm(user_input))
+                self.frame_ready.emit(qt_image, rgb_frame)
+        cap.release()
+
+    def stop(self):
+        self._is_running = False
+        self.wait()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Autocube - Vision Scanner")
+        self.scan_order = ["U", "F", "D", "B", "L", "R"]
+        self.current_face = 0
+        self.scanned_data = {}
+        self.latest_frame = None
+        self.video_label = QLabel("Starting camera...")
+        self.instruction_label = QLabel(
+            f"Align the {self.scan_order[0]} face and click Scan."
+        )
+        self.instruction_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.instruction_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        self.scan_btn = QPushButton("Scan Face")
+        self.scan_btn.clicked.connect(self.scan_current_face)
+        layout = QVBoxLayout()
+        layout.addWidget(self.instruction_label)
+        layout.addWidget(self.video_label)
+        layout.addWidget(self.scan_btn)
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
+        self.camera_thread = CameraThread()
+        self.camera_thread.frame_ready.connect(self.update_feed)
+        self.camera_thread.start()
+
+    @Slot(QImage, object)
+    def update_feed(self, image: QImage, raw_frame):
+        image.mirror(horizontally=True, vertically=False)
+        self.video_label.setPixmap(QPixmap.fromImage(image))
+        self.latest_frame = raw_frame
+
+    def scan_current_face(self):
+        if self.latest_frame is None or self.current_face >= len(self.scan_order):
+            return
+        face_name = self.scan_order[self.current_face]
+        h, w = self.latest_frame.shape[:2]
+        cx, cy = w // 2, h // 2
+        grid_size = self.camera_thread.grid_size
+        face_colors = []
+        for row in [-1, 0, 1]:
+            row_colors = []
+            for col in [-1, 0, 1]:
+                x = cx + (col * grid_size)
+                y = cy + (row * grid_size)
+                r, g, b = self.latest_frame[y, x]
+                row_colors.append((int(r), int(g), int(b)))
+            face_colors.append(row_colors)
+        self.scanned_data[face_name] = face_colors
+        self.current_face += 1
+        if self.current_face < len(self.scan_order):
+            next_face = self.scan_order[self.current_face]
+            self.instruction_label.setText(
+                f"Align the {next_face} face and click Scan."
             )
+        else:
+            self.instruction_label.setText("Scan Complete!")
+            self.scan_btn.setEnabled(False)
+            print(self.scanned_data)
+
+    def closeEvent(self, event):
+        self.camera_thread.stop()
+        event.accept()
 
 
-def print_color(rgb: tuple[float, float, float], text: str = "████████"):
-    r, g, b = map(lambda x: int((max(0, min(100, x)) / 100.0) * 255), rgb)
-    color_code = f"\033[38;2;{r};{g};{b}m"
-    reset_code = "\033[0m"
-    print(f"{color_code}{text}{reset_code} RGB: ({r:^5.1f}, {g:^5.1f}, {b:^5.1f})")
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
