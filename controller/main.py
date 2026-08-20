@@ -12,6 +12,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from controller.connector import CubeManipulator, CubeScanner, Robot
+from logic.solver import solve_cube
+
 EV3_ADDRESS = "ev3dev.local"
 PORT = 65432
 
@@ -58,6 +61,7 @@ class MainWindow(QMainWindow):
         self.scan_order = ["U", "F", "D", "B", "L", "R"]
         self.current_face = 0
         self.scanned_data = {}
+        self.motor_algorithm = None
         self.latest_frame = None
         self.video_label = QLabel("Starting camera...")
         self.instruction_label = QLabel(
@@ -108,9 +112,30 @@ class MainWindow(QMainWindow):
                 f"Align the {next_face} face and click Scan."
             )
         else:
-            self.instruction_label.setText("Scan Complete!")
+            position_instruction = (
+                "Please position the cube in the robot"
+                " with the yellow face facing up and the red face facing forward."
+            )
+            self.instruction_label.setText(
+                f"Scan complete, calculating solution...\n{position_instruction}"
+            )
             self.scan_btn.setEnabled(False)
-            print(self.scanned_data)
+            scanner = CubeScanner()
+            scanner.update_center_colors(self.scanned_data, center_index=1)
+            cube = scanner.colors_to_cube(self.scanned_data)
+            solution = solve_cube(cube)
+            manipulator = CubeManipulator()
+            self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
+            self.instruction_label.setText(
+                f"Solution found.\n{position_instruction}\n{solution}"
+            )
+            self.scan_btn.setText("Execute Solution")
+            self.scan_btn.setEnabled(True)
+        if self.motor_algorithm:
+            self.scan_btn.setEnabled(False)
+            with Robot(EV3_ADDRESS, PORT) as robot:
+                robot.connect()
+                robot.apply_motor_algorithm(self.motor_algorithm)
 
     def closeEvent(self, event):
         self.camera_thread.stop()

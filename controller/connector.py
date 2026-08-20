@@ -105,7 +105,9 @@ class CubeManipulator:
         }
         self._moves_to_apply = []
 
-    def cube_to_motor_algorithm(self, algorithm: Algorithm) -> Algorithm:
+    def cube_to_motor_algorithm(self, algorithm: Algorithm | str) -> Algorithm:
+        if isinstance(algorithm, str):
+            algorithm = Algorithm(algorithm)
         self._moves_to_apply.clear()
         for move in algorithm.moves:
             face = move[0]
@@ -171,15 +173,16 @@ class CubeManipulator:
 class CubeScanner:
     def __init__(
         self,
-        robot: Robot,
-        cube_manipulator: CubeManipulator,
+        robot: Robot | None = None,
+        cube_manipulator: CubeManipulator | None = None,
     ):
         self.robot = robot
         self.cube_manipulator = cube_manipulator
-        self.center_colors = None
+        self.center_colors = {}
 
     def scan(self) -> Cube:
-        cube = Cube()
+        if self.robot is None or self.cube_manipulator is None:
+            raise ValueError("Robot and CubeManipulator must be provided.")
         self.center_colors = {}
         face_colors = {}
         self.cube_manipulator.bring_face_down("D", is_logical=True)
@@ -203,6 +206,16 @@ class CubeScanner:
                     self.center_colors[face] = color
                 else:
                     self.robot.queue("a b 1000 -135")
+        cube = self.colors_to_cube(face_colors)
+        self.cube_manipulator.bring_face_down("D", is_logical=True)
+        self.cube_manipulator.bring_face_front("F", is_logical=True)
+        self.robot.apply_manipulations(self.cube_manipulator)
+        return cube
+
+    def colors_to_cube(
+        self, face_colors: dict[str, list[tuple[float, float, float]]]
+    ) -> Cube:
+        cube = Cube()
         for face in mappings.FACE_SCAN_ORDER:
             for faces, position_map in mappings.FACE_SCAN_POSITIONS.items():
                 if face in faces:
@@ -214,14 +227,13 @@ class CubeScanner:
                     break
             else:
                 raise ValueError(f"Face '{face}' not found in FACE_SCAN_POSITIONS.")
-        self.cube_manipulator.bring_face_down("D", is_logical=True)
-        self.cube_manipulator.bring_face_front("F", is_logical=True)
-        self.robot.apply_manipulations(self.cube_manipulator)
         return cube
 
     def scan_face_position(
         self, face: str, position: int, reset_position: bool = False
     ) -> tuple[float, float, float]:
+        if self.robot is None or self.cube_manipulator is None:
+            raise ValueError("Robot and CubeManipulator must be provided.")
         self.cube_manipulator.bring_face_down(
             logic_mappings.OPPOSITE_FACES[face], is_logical=True
         )
@@ -248,3 +260,11 @@ class CubeScanner:
                 "No closest color found. Calibration data may be incomplete."
             )
         return closest_color
+
+    def update_center_colors(
+        self, colors: dict[str, tuple[float, float, float]], center_index: int
+    ):
+        if not colors:
+            raise ValueError("New center colors cannot be empty.")
+        for face, facelets in colors.items():
+            self.center_colors[face] = facelets[center_index]
