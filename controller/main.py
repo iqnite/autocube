@@ -3,6 +3,7 @@ Main entry point for the robot controller.
 """
 
 import sys
+import time
 
 from controller.connector import CubeManipulator, CubeScanner, Robot
 from logic import solver
@@ -37,11 +38,20 @@ def main():
                 )
                 print("Cube solved!")
                 continue
-            if user_input == "scan":
-                scanner = CubeScanner(robot, manipulator)
-                cube = scanner.scan()
-                visualize_cube(cube)
-                continue
+            if user_input.strip().startswith("scan"):
+                if "cont" in user_input:
+                    while True:
+                        try:
+                            print_color(robot.scan_color())
+                            time.sleep(0.5)
+                        except KeyboardInterrupt:
+                            break
+                    continue
+                else:
+                    scanner = CubeScanner(robot, manipulator)
+                    cube = scanner.scan()
+                    visualize_cube(cube)
+                    continue
             if user_input.startswith("cmd"):
                 command = user_input[4:]
                 print(robot.execute(command))
@@ -49,6 +59,13 @@ def main():
             robot.apply_motor_algorithm(
                 manipulator.cube_to_motor_algorithm(Algorithm(user_input))
             )
+
+
+def print_color(rgb: tuple[float, float, float], text: str = "████████"):
+    r, g, b = map(lambda x: int((max(0, min(100, x)) / 100.0) * 255), rgb)
+    color_code = f"\033[38;2;{r};{g};{b}m"
+    reset_code = "\033[0m"
+    print(f"{color_code}{text}{reset_code} RGB: ({r:^5.1f}, {g:^5.1f}, {b:^5.1f})")
 
 
 if __name__ == "__main__":
