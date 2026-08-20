@@ -135,7 +135,6 @@ class MainWindow(QMainWindow):
             scanner = CubeScanner()
             scanner.update_center_colors(self.scanned_data, (1, 1))
             cube = scanner.rgb_to_cube(self.scanned_data)
-            visualize_cube(cube)
             solution = solve_cube(cube)
             manipulator = CubeManipulator()
             self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
@@ -144,6 +143,7 @@ class MainWindow(QMainWindow):
             )
             self.scan_btn.setText("Execute Solution")
             self.scan_btn.setEnabled(True)
+            return
         if self.motor_algorithm:
             self.scan_btn.setEnabled(False)
             with Robot(EV3_ADDRESS, PORT) as robot:
