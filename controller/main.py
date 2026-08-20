@@ -16,7 +16,6 @@ from controller.connector import CubeManipulator, CubeScanner, Robot
 from controller import mappings
 from logic.autofix import autofix_scan
 from logic.solver import solve_cube
-from script.visualizer import visualize_cube
 
 EV3_ADDRESS = "ev3dev.local"
 PORT = 65432
@@ -28,7 +27,7 @@ class CameraThread(QThread):
     def __init__(self):
         super().__init__()
         self._is_running = True
-        self.grid_size = 60
+        self.grid_size = 100
         self.rectangle_color = mappings.FACE_BGRS["U"]
 
     def run(self):
@@ -137,8 +136,6 @@ class MainWindow(QMainWindow):
             scanner.update_center_colors(self.scanned_data, (1, 1))
             cube = scanner.rgb_to_cube(self.scanned_data)
             cube.state = autofix_scan(cube.state)[0]
-            visualize_cube(cube)
-            return
             solution = solve_cube(cube)
             manipulator = CubeManipulator()
             self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
