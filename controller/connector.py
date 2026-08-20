@@ -209,7 +209,7 @@ class CubeScanner:
                     for row, row_data in enumerate(position_map):
                         for col, color_index in enumerate(row_data):
                             cube.state[face][row][col] = self.get_closest_center_color(
-                                *face_colors[color_index]
+                                *face_colors[face][color_index]
                             )
                     break
             else:
