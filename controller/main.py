@@ -165,9 +165,9 @@ class MainWindow(QMainWindow):
             "Please position the cube in the robot"
             " with the yellow face facing up and the red face facing you."
         )
+        self.scan_btn.setEnabled(False)
         self.instruction_label.setText("Scan complete, calculating solution...")
         self.video_label.setText(position_instruction)
-        self.scan_btn.setEnabled(False)
         scanner = CubeScanner()
         scanner.update_center_colors(self.scanned_data, (1, 1))
         cube = scanner.rgb_to_cube(self.scanned_data)
