@@ -222,7 +222,7 @@ def ocll(cube: Cube):
             cube.apply_algorithm(Algorithm(mappings.UP_CORNER_ALGORITHMS[adj_ups]))
             return
         cube.apply_algorithm(Algorithm("U"))
-    raise RuntimeError("Cannot find solution for last layer corners.")
+    raise SolutionError("Cannot find solution for last layer corners.")
 
 
 def cpll(cube: Cube):
@@ -288,7 +288,7 @@ def epll(cube: Cube):
                 Algorithm("R2 U' R' U' R U R U R U' R", translation_reference=face)
             )
             return
-    raise RuntimeError("Cannot find solution for last layer edge orientation.")
+    raise SolutionError("Cannot find solution for last layer edge orientation.")
 
 
 def last_rotation(cube: Cube):
@@ -297,7 +297,7 @@ def last_rotation(cube: Cube):
         cube.apply_algorithm(Algorithm("U"))
         c += 1
         if c > 4:
-            raise RuntimeError("Cannot find solution for last layer rotation.")
+            raise SolutionError("Cannot find solution for last layer rotation.")
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:
@@ -310,3 +310,7 @@ def insert_edge(
     if side == "right":
         return Algorithm("U F' R' U' R F R' U R", translation_reference=reference_front)
     return Algorithm("U' F L U L' F' L U' L'", translation_reference=reference_front)
+
+
+class SolutionError(Exception):
+    pass
