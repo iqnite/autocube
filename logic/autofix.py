@@ -49,7 +49,7 @@ def is_cube_valid(state: dict[str, list[list[str]]]) -> bool:
     return True
 
 
-def autofix_scan(
+def autofix_cube_state(
     state: dict[str, list[list[str]]],
 ) -> tuple[dict[str, list[list[str]]], str]:
     counts = {c: 0 for c in "UDFBRL"}

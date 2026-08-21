@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 
 from controller.connector import CubeManipulator, CubeScanner, Robot
 from controller import mappings
-from logic.autofix import autofix_scan
+from logic.autofix import autofix_cube_state
 from logic.solver import solve_cube
 
 EV3_ADDRESS = "ev3dev.local"
@@ -170,7 +170,7 @@ class MainWindow(QMainWindow):
         scanner = CubeScanner()
         scanner.update_center_colors(self.scanned_data, (1, 1))
         cube = scanner.rgb_to_cube(self.scanned_data)
-        cube.state = autofix_scan(cube.state)[0]
+        cube.state = autofix_cube_state(cube.state)[0]
         print(cube.to_json())
         solution = solve_cube(cube)
         manipulator = CubeManipulator()
