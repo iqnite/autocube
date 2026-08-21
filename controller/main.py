@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
     def calculate_solution(self):
         position_instruction = (
             "Please position the cube in the robot"
-            " with the white face facing up and the orange face facing forward."
+            " with the yellow face facing up and the red face facing you."
         )
         self.instruction_label.setText(
             f"Scan complete, calculating solution...\n{position_instruction}"
