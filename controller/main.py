@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
     def update_feed(self, image: QImage, raw_frame):
         image.mirror(horizontally=True, vertically=False)
         self.video_label.setPixmap(QPixmap.fromImage(image))
-        self.latest_frame = raw_frame
+        self.latest_frame = cv2.flip(raw_frame, 1)
 
     def scan_current_face(self):
         if self.latest_frame is None:
@@ -170,8 +170,10 @@ class MainWindow(QMainWindow):
         scanner = CubeScanner()
         scanner.update_center_colors(self.scanned_data, (1, 1))
         cube = scanner.rgb_to_cube(self.scanned_data)
-        cube.state = autofix_cube_state(cube.state)[0]
+        cube.state, error = autofix_cube_state(cube.state)
         print(cube.to_json())
+        if error:
+            print(error)
         solution = solve_cube(cube)
         manipulator = CubeManipulator()
         self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
