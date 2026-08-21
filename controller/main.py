@@ -190,6 +190,7 @@ class MainWindow(QMainWindow):
         with Robot(EV3_ADDRESS, PORT) as robot:
             robot.connect()
             robot.apply_motor_algorithm(self.motor_algorithm)
+        self.instruction_label.setText("Solution executed. Cube should be solved.")
 
     def closeEvent(self, event):
         self.camera_thread.stop()
