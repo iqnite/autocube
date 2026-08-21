@@ -1,12 +1,36 @@
 # Autocube
 
-Autocube is a work-in-progress 3x3x3 Rubik's cube solver. Right now, it takes a file path from the command line and outputs the solution moves. Code for auto-solving with LEGO Mindstorms EV3 robots will be added soon.
+Autocube is a work-in-progress 3x3x3 Rubik's cube solver. It can either solve cubes from a JSON representation, or perform algorithms on a physical cube via a LEGO Mindstorms EV3 robot.
+
+## Robot
+
+### Robot Controller Installation
+
+1. Build the robot according to the [Mindcuber](https://mindcuber.com/) instructions.
+2. Install [Git](https://git-scm.com/downloads) and [Python](https://www.python.org/downloads/).
+3. Follow the instructions in the [LEGO Mindstorms EV3 Python documentation](https://pybricks.com/ev3-micropython/) to install the Pybricks firmware on your EV3 brick and connect it to your computer.
+4. Clone the repository and install the required dependencies:
+
+   ```bash
+   git clone https://github.com/iqnite/autocube
+   cd autocube/controller
+   pip install -r requirements.txt
+   ```
+
+5. Connect your EV3 brick to your computer via USB or Bluetooth. Make sure the brick is turned on and running the Pybricks firmware.
+
+### Solving cubes with the Robot
+
+1. Open the autocube folder in Visual Studio Code.
+2. Navigate to the _Run and Debug_ tab, select _robot_ from the dropdown menu, and click the green play button to download the program to the robot.
+3. Open the dropdown menu again, select _controller_, and click the green play button to start the controller program on your computer.
+4. The controller program will open a window with a live camera feed. Follow the on-screen instructions to scan the cube and execute the solution.
 
 ## Script
 
 [Demo video](https://youtu.be/HdCdrFA-3j8)
 
-### Installation
+### Script Installation
 
 To use the script, download it from the [Releases](https://github.com/iqnite/autocube/releases/latest/) page...
 
@@ -14,7 +38,7 @@ To use the script, download it from the [Releases](https://github.com/iqnite/aut
 
 ```bash
 git clone https://github.com/iqnite/autocube
-cd autocube
+cd autocube/script
 pip install -r requirements.txt
 ```
 
