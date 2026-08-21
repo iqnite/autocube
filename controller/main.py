@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         face_colors = []
         for row in [-1, 0, 1]:
             row_colors = []
-            for col in [-1, 0, 1]:
+            for col in [1, 0, -1]:
                 x = cx + (col * grid_size)
                 y = cy + (row * grid_size)
                 r, g, b = map(int, self.latest_frame[y, x])
