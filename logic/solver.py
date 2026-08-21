@@ -79,36 +79,9 @@ def fl_cross(cube: Cube):
 
 def fl_corners(cube: Cube):
     while True:
-        white_corners = cube.get_corners_of_color(color="D")
-        unsolved_corners: list[CornerToSolve] = []
-        for corner in white_corners:
-            face, row, col = corner.tuple
-            adj_faces = cube.get_faces_adjacent_to_corner(corner)
-            colors = cube.get_colors_adjacent_to_corner(corner)
-            if face in ("U", "D"):
-                side_faces = adj_faces
-            else:
-                side_1 = face
-                side_2 = (
-                    adj_faces[0] if adj_faces[0] not in ("U", "D") else adj_faces[1]
-                )
-                side_faces = (side_1, side_2)
-
-            center1 = cube.state[side_faces[0]][1][1]
-            center2 = cube.state[side_faces[1]][1][1]
-            is_correct_column = {colors[0], colors[1]} == {center1, center2}
-            if face == "D" and is_correct_column:
-                continue
-
-            unsolved_corners.append(
-                CornerToSolve(
-                    corner, side_faces, is_correct_column, face, adj_faces, colors
-                )
-            )
-
+        unsolved_corners: list[CornerToSolve] = list(get_unsolved_corners(cube))
         if not unsolved_corners:
             break
-
         unsolved_corners.sort(key=lambda x: sorted(x.colors))
         target = unsolved_corners[0]
         front_face = mappings.FRONT_FACE_FOR_CORNER[frozenset(target.side_faces)]
@@ -127,6 +100,28 @@ def fl_corners(cube: Cube):
                     )
             else:
                 cube.apply_algorithm(Algorithm("U"))
+
+
+def get_unsolved_corners(cube: Cube):
+    white_corners = cube.get_corners_of_color(color="D")
+    for corner in white_corners:
+        face, row, col = corner.tuple
+        adj_faces = cube.get_faces_adjacent_to_corner(corner)
+        colors = cube.get_colors_adjacent_to_corner(corner)
+        if face in ("U", "D"):
+            side_faces = adj_faces
+        else:
+            side_1 = face
+            side_2 = adj_faces[0] if adj_faces[0] not in ("U", "D") else adj_faces[1]
+            side_faces = (side_1, side_2)
+        center1 = cube.state[side_faces[0]][1][1]
+        center2 = cube.state[side_faces[1]][1][1]
+        is_correct_column = {colors[0], colors[1]} == {center1, center2}
+        if face == "D" and is_correct_column:
+            continue
+        yield CornerToSolve(
+            corner, side_faces, is_correct_column, face, adj_faces, colors
+        )
 
 
 def ml(cube: Cube):
