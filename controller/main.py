@@ -100,7 +100,13 @@ class MainWindow(QMainWindow):
         self.latest_frame = raw_frame
 
     def scan_current_face(self):
-        if self.latest_frame is None or self.current_face >= len(self.scan_order):
+        if self.latest_frame is None:
+            return
+        if (
+            self.current_face >= len(self.scan_order)
+            and self.motor_algorithm is not None
+        ):
+            self.execute_solution()
             return
         face_name = self.scan_order[self.current_face]
         h, w = self.latest_frame.shape[:2]
@@ -124,32 +130,39 @@ class MainWindow(QMainWindow):
                 f"Align the {next_face} face and click Scan."
             )
         else:
-            position_instruction = (
-                "Please position the cube in the robot"
-                " with the white face facing up and the orange face facing forward."
-            )
-            self.instruction_label.setText(
-                f"Scan complete, calculating solution...\n{position_instruction}"
-            )
-            self.scan_btn.setEnabled(False)
-            scanner = CubeScanner()
-            scanner.update_center_colors(self.scanned_data, (1, 1))
-            cube = scanner.rgb_to_cube(self.scanned_data)
-            cube.state = autofix_scan(cube.state)[0]
-            solution = solve_cube(cube)
-            manipulator = CubeManipulator()
-            self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
-            self.instruction_label.setText(
-                f"Solution found.\n{position_instruction}\n{solution}"
-            )
-            self.scan_btn.setText("Execute Solution")
-            self.scan_btn.setEnabled(True)
+            self.calculate_solution()
             return
-        if self.motor_algorithm:
-            self.scan_btn.setEnabled(False)
-            with Robot(EV3_ADDRESS, PORT) as robot:
-                robot.connect()
-                robot.apply_motor_algorithm(self.motor_algorithm)
+
+    def calculate_solution(self):
+        position_instruction = (
+            "Please position the cube in the robot"
+            " with the white face facing up and the orange face facing forward."
+        )
+        self.instruction_label.setText(
+            f"Scan complete, calculating solution...\n{position_instruction}"
+        )
+        self.scan_btn.setEnabled(False)
+        scanner = CubeScanner()
+        scanner.update_center_colors(self.scanned_data, (1, 1))
+        cube = scanner.rgb_to_cube(self.scanned_data)
+        cube.state = autofix_scan(cube.state)[0]
+        print(cube.to_json())
+        solution = solve_cube(cube)
+        manipulator = CubeManipulator()
+        self.motor_algorithm = manipulator.cube_to_motor_algorithm(solution)
+        print(solution)
+        print(self.motor_algorithm)
+        self.instruction_label.setText(f"Solution found.\n{position_instruction}")
+        self.scan_btn.setText("Execute Solution")
+        self.scan_btn.setEnabled(True)
+
+    def execute_solution(self):
+        if self.motor_algorithm is None:
+            return
+        self.scan_btn.setEnabled(False)
+        with Robot(EV3_ADDRESS, PORT) as robot:
+            robot.connect()
+            robot.apply_motor_algorithm(self.motor_algorithm)
 
     def closeEvent(self, event):
         self.camera_thread.stop()
