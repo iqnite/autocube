@@ -114,9 +114,7 @@ def fl_corners(cube: Cube):
         front_face = mappings.FRONT_FACE_FOR_CORNER[frozenset(target.side_faces)]
         in_bottom_layer = target.face == "D" or "D" in target.adj_faces
         if in_bottom_layer:
-            cube.apply_algorithm(
-                Algorithm("R U R' U'", translation_reference=front_face)
-            )
+            cube.apply_algorithm(sexy_move(front_face))
         else:
             if target.is_correct_column:
                 if target.face == "U":
