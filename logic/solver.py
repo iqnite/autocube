@@ -292,8 +292,12 @@ def epll(cube: Cube):
 
 
 def last_rotation(cube: Cube):
+    c = 0
     while cube.state["F"][0][0] != "F":
         cube.apply_algorithm(Algorithm("U"))
+        c += 1
+        if c > 4:
+            raise RuntimeError("Cannot find solution for last layer rotation.")
 
 
 def sexy_move(reference_front: str | None = None) -> Algorithm:

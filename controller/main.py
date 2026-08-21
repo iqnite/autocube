@@ -28,7 +28,8 @@ class CameraThread(QThread):
         super().__init__()
         self._is_running = True
         self.grid_size = 100
-        self.rectangle_color = mappings.FACE_BGRS["U"]
+        self.rectangle_color = None
+        self.adjacent_colors = None
 
     def run(self):
         cap = cv2.VideoCapture(0)
@@ -37,15 +38,35 @@ class CameraThread(QThread):
             if ret:
                 h, w = frame.shape[:2]
                 cx, cy = w // 2, h // 2
-                for row in [-1, 0, 1]:
-                    for col in [-1, 0, 1]:
-                        x = cx + (col * self.grid_size)
-                        y = cy + (row * self.grid_size)
+                if self.rectangle_color is not None:
+                    for row in [-1, 0, 1]:
+                        for col in [-1, 0, 1]:
+                            x = cx + (col * self.grid_size)
+                            y = cy + (row * self.grid_size)
+                            cv2.rectangle(
+                                frame,
+                                (x - 5, y - 5),
+                                (x + 5, y + 5),
+                                self.rectangle_color,
+                                2,
+                            )
+                if self.adjacent_colors is not None:
+                    for idx, (row, col, xd, yd) in enumerate(
+                        [
+                            (-1.5, -1, 2, 0),
+                            (-1, -1.5, 0, 2),
+                            (1.5, -1, 2, 0),
+                            (-1, 1.5, 0, 2),
+                        ]
+                    ):
+                        x = int(cx + (col * self.grid_size))
+                        y = int(cy + (row * self.grid_size))
+                        d = self.grid_size
                         cv2.rectangle(
                             frame,
-                            (x - 5, y - 5),
-                            (x + 5, y + 5),
-                            self.rectangle_color,
+                            (x, y),
+                            (x + d * xd, y + d * yd),
+                            self.adjacent_colors[idx],
                             2,
                         )
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -60,9 +81,12 @@ class CameraThread(QThread):
         self._is_running = False
         self.wait()
 
-    @Slot("tuple[int, int, int]")
-    def set_guide_color(self, color: tuple[int, int, int]):
-        self.rectangle_color = color
+    @Slot(str)
+    def set_guide_face(self, face: str):
+        self.rectangle_color = mappings.FACE_BGRS[face]
+        self.adjacent_colors = [
+            mappings.FACE_BGRS[adj_face] for adj_face in mappings.ADJ_FACES[face]
+        ]
 
 
 class MainWindow(QMainWindow):
@@ -90,6 +114,7 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
         self.camera_thread = CameraThread()
+        self.camera_thread.set_guide_face(self.scan_order[0])
         self.camera_thread.frame_ready.connect(self.update_feed)
         self.camera_thread.start()
 
@@ -125,7 +150,7 @@ class MainWindow(QMainWindow):
         self.current_face += 1
         if self.current_face < len(self.scan_order):
             next_face = self.scan_order[self.current_face]
-            self.camera_thread.set_guide_color(mappings.FACE_BGRS[next_face])
+            self.camera_thread.set_guide_face(next_face)
             self.instruction_label.setText(
                 f"Align the {next_face} face and click Scan."
             )
