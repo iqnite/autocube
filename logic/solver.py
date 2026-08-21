@@ -2,6 +2,7 @@
 Contains functions for solving every layer of the cube.
 """
 
+from dataclasses import dataclass
 from typing import Literal
 
 from logic import mappings
@@ -79,7 +80,7 @@ def fl_cross(cube: Cube):
 def fl_corners(cube: Cube):
     while True:
         white_corners = cube.get_corners_of_color(color="D")
-        unsolved_corners = []
+        unsolved_corners: list[CornerToSolve] = []
         for corner in white_corners:
             face, row, col = corner.tuple
             adj_faces = cube.get_faces_adjacent_to_corner(corner)
@@ -100,32 +101,27 @@ def fl_corners(cube: Cube):
                 continue
 
             unsolved_corners.append(
-                {
-                    "corner": corner,
-                    "side_faces": side_faces,
-                    "is_correct_column": is_correct_column,
-                    "face": face,
-                    "adj_faces": adj_faces,
-                    "colors": colors,
-                }
+                CornerToSolve(
+                    corner, side_faces, is_correct_column, face, adj_faces, colors
+                )
             )
 
         if not unsolved_corners:
             break
 
-        unsolved_corners.sort(key=lambda x: sorted(x["colors"]))
+        unsolved_corners.sort(key=lambda x: sorted(x.colors))
         target = unsolved_corners[0]
-        front_face = mappings.FRONT_FACE_FOR_CORNER[frozenset(target["side_faces"])]
-        in_bottom_layer = target["face"] == "D" or "D" in target["adj_faces"]
+        front_face = mappings.FRONT_FACE_FOR_CORNER[frozenset(target.side_faces)]
+        in_bottom_layer = target.face == "D" or "D" in target.adj_faces
         if in_bottom_layer:
             cube.apply_algorithm(
                 Algorithm("R U R' U'", translation_reference=front_face)
             )
         else:
-            if target["is_correct_column"]:
-                if target["face"] == "U":
+            if target.is_correct_column:
+                if target.face == "U":
                     cube.apply_algorithm(sexy_move(front_face) * 3)
-                elif target["face"] == front_face:
+                elif target.face == front_face:
                     cube.apply_algorithm(-sexy_move(front_face))
                 else:
                     cube.apply_algorithm(
@@ -310,6 +306,16 @@ def insert_edge(
     if side == "right":
         return Algorithm("U F' R' U' R F R' U R", translation_reference=reference_front)
     return Algorithm("U' F L U L' F' L U' L'", translation_reference=reference_front)
+
+
+@dataclass
+class CornerToSolve:
+    corner: Facelet
+    side_faces: tuple[str, str]
+    is_correct_column: bool
+    face: str
+    adj_faces: tuple[str, str]
+    colors: tuple[str, str]
 
 
 class SolutionError(Exception):
