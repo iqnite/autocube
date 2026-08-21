@@ -92,7 +92,7 @@ class CameraThread(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Autocube - Vision Scanner")
+        self.setWindowTitle("Autocube")
         self.scan_order = mappings.FACE_SCAN_ORDER
         self.current_face = 0
         self.scanned_data: dict[str, list[list[tuple[float, float, float]]]] = {}
@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
         self.instruction_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.instruction_label.setStyleSheet("font-size: 18px; font-weight: bold;")
         self.scan_btn = QPushButton("Scan Face")
+        self.scan_btn.setEnabled(False)
         self.scan_btn.clicked.connect(self.scan_current_face)
         layout = QVBoxLayout()
         layout.addWidget(self.instruction_label)
@@ -120,6 +121,7 @@ class MainWindow(QMainWindow):
 
     @Slot(QImage, object)
     def update_feed(self, image: QImage, raw_frame):
+        self.scan_btn.setEnabled(True)
         image.mirror(horizontally=True, vertically=False)
         self.video_label.setPixmap(QPixmap.fromImage(image))
         self.latest_frame = cv2.flip(raw_frame, 1)
@@ -163,9 +165,8 @@ class MainWindow(QMainWindow):
             "Please position the cube in the robot"
             " with the yellow face facing up and the red face facing you."
         )
-        self.instruction_label.setText(
-            f"Scan complete, calculating solution...\n{position_instruction}"
-        )
+        self.instruction_label.setText("Scan complete, calculating solution...")
+        self.video_label.setText(position_instruction)
         self.scan_btn.setEnabled(False)
         scanner = CubeScanner()
         scanner.update_center_colors(self.scanned_data, (1, 1))
@@ -181,7 +182,7 @@ class MainWindow(QMainWindow):
         print(solution)
         print("Motor steps:")
         print(self.motor_algorithm)
-        self.instruction_label.setText(f"Solution found.\n{position_instruction}")
+        self.instruction_label.setText("Solution found")
         self.scan_btn.setText("Execute Solution")
         self.scan_btn.setEnabled(True)
 
