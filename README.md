@@ -4,6 +4,8 @@ Autocube is a work-in-progress 3x3x3 Rubik's cube solver. It can either solve cu
 
 ## Robot
 
+[Demo video](https://youtu.be/EfhrIaZWvno)
+
 ### Robot Controller Installation
 
 1. Build the robot according to the [Mindcuber](https://mindcuber.com/) instructions.
