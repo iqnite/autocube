@@ -99,6 +99,8 @@ Coming soon!
 
 ## Credits
 
+Thanks to [Mindcuber](https://mindcuber.com/) for the robot design.
+
 Huge thanks to the maintainer(s) of the [Solve the Cube](https://solvethecube.com/) website for the solution algorithms and tutorials.
 
 LLMs were used for help with structuring the representation of the cube, as well as with mappings. Solutions and docs were entirely written by hand.
