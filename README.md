@@ -95,10 +95,6 @@ The `--live` option shows every move in real time on a flattened representation 
 
 Note that the live view will drastically increase solution times, since performance is limited by the screen's framerate.
 
-## Hardware
-
-Coming soon!
-
 ## Credits
 
 Thanks to [Mindcuber](https://mindcuber.com/) for the robot design.
